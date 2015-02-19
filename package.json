@@ -1,0 +1,25 @@
+{
+  "name": "hotmetal",
+  "version": "1.0.1",
+  "description": "Parse, hyphenate, slice, and render your HTML.",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loveencounterflow/hotmetal.git"
+  },
+  "keywords": [
+    "html",
+    "slice",
+    "parse",
+    "render"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/hotmetal/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/hotmetal"
+}
