@@ -21,5 +21,10 @@
   "bugs": {
     "url": "https://github.com/loveencounterflow/hotmetal/issues"
   },
-  "homepage": "https://github.com/loveencounterflow/hotmetal"
+  "homepage": "https://github.com/loveencounterflow/hotmetal",
+  "dependencies": {
+    "cnd": "^0.1.5",
+    "coffeenode-teacup": "^0.1.4",
+    "pipedreams2": "^0.2.11"
+  }
 }
