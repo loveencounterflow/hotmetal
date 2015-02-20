@@ -57,6 +57,17 @@ $                         = D.remit.bind D
   return TEACUP.render => TEACUP.TAG name, attributes
 
 
+# #===========================================================================================================
+# # TEXT HYPHENATION
+# #-----------------------------------------------------------------------------------------------------------
+# @_$hyphenate = ( P... ) ->
+#   hyphenate = D.new_hyphenator P...
+#   #.........................................................................................................
+#   return $ ( event, send ) =>
+#     event[ 1 ] = hyphenate event[ 1 ] if event[ 0 ] is 'text'
+#     send event
+
+
 #===========================================================================================================
 # POD CREATION
 #-----------------------------------------------------------------------------------------------------------
@@ -130,9 +141,16 @@ $                         = D.remit.bind D
 #===========================================================================================================
 # PARSING
 #-----------------------------------------------------------------------------------------------------------
-@parse = ( html, handler ) ->
+@parse = ( html, settings, handler ) ->
+  switch arity = arguments.length
+    when 2
+      handler   = settings
+      settings  = {}
+    when 3
+      null
+    else throw new Error "expected 2 or 3 arguments, got #{arity}"
   CND.validate_isa_function handler
-  @_parse html, handler
+  @_parse html, settings, handler
   return null
 
 #-----------------------------------------------------------------------------------------------------------
@@ -140,9 +158,15 @@ $                         = D.remit.bind D
   throw new Error "not implemented"
 
 #-----------------------------------------------------------------------------------------------------------
-@_parse = ( html, handler = null ) ->
-  input   = D.create_throughstream()
-  _send   = null
+@_parse = ( html, settings, handler = null ) ->
+  input       = D.create_throughstream()
+  _send       = null
+  #---------------------------------------------------------------------------------------------------------
+  if settings[ 'hyphenation' ] is false
+    hyphenate   = ( text ) => text
+  else
+    hyphenation = if settings[ 'hyphenation' ] is true then null else settings[ 'hyphenation' ]
+    hyphenate   = D.new_hyphenator hyphenation
   #---------------------------------------------------------------------------------------------------------
   handler ?= ( error, hotml ) =>
     return _send.error error if error
@@ -150,6 +174,8 @@ $                         = D.remit.bind D
   #---------------------------------------------------------------------------------------------------------
   input
     .pipe D.HTML.$parse()
+    .pipe D.HTML.$collect_texts()
+    .pipe D.$show()
     #.......................................................................................................
     .pipe do =>
       [ open_tags
@@ -163,16 +189,40 @@ $                         = D.remit.bind D
         #...................................................................................................
         switch type
           #.................................................................................................
-          when 'text', 'lone-tag'
+          when 'lone-tag'
+            tag = @render_open_tag tail...
             switch last_type
               #.............................................................................................
               when null, 'close-tag', 'lone-tag', 'text'
                 open_tags.push []
-                texts.push if type is 'text' then tail[ 0 ] else @render_open_tag tail...
+                texts.push tag
                 close_tags.push []
               #.............................................................................................
               when 'open-tag'
-                texts[ texts.length - 1 ] = tail[ 0 ]
+                texts[ texts.length - 1 ] = tag
+              #.............................................................................................
+              else
+                return handler new Error "1 ignored event of type #{rpr type}"
+          #.................................................................................................
+          when 'text'
+            text_parts  = D.break_lines hyphenate tail[ 0 ]
+            # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
+            switch last_type
+              #.............................................................................................
+              when null, 'close-tag', 'lone-tag', 'text'
+                for text_part in text_parts
+                  open_tags.push []
+                  texts.push text_part
+                  close_tags.push []
+              #.............................................................................................
+              when 'open-tag'
+                for text_part, idx in text_parts
+                  if idx is 0
+                    texts[ texts.length - 1 ] = text_part
+                  else
+                    open_tags.push []
+                    texts.push text_part
+                    close_tags.push []
               #.............................................................................................
               else
                 return handler new Error "1 ignored event of type #{rpr type}"
@@ -220,7 +270,7 @@ $                         = D.remit.bind D
 # DEMO
 #-----------------------------------------------------------------------------------------------------------
 @demo = ->
-  html = """lo <div id='mydiv'><em><i>arc <b>bo</b> cy <span class='foo'></span> dean</i></em> eps <img src='x.jpg'> foo gig hey</div>"""
+  html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration <b>bromance</b> cyberspace <span class='foo'></span> dean</i></em> eps foo gig hey</div>"""
   @parse html, ( error, hotml ) =>
     throw error if error?
     start = 5
