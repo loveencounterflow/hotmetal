@@ -2,6 +2,8 @@
 
 - [HoTMtaL](#hotmtal)
 	- [Motivation](#motivation)
+	- [The Problem](#the-problem)
+	- [The Solution](#the-solution)
 	- [API](#api)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -12,7 +14,11 @@
 ## Motivation
 
 HoTMtaL has been developed to simplify the finding of good line breaks in HTML sources; this is a core
-ingredient for the [MingKwai Typesetter]()
+ingredient for the [MingKwai Typesetter](https://github.com/loveencounterflow/mingkwai-app).
+
+## The Problem
+
+## The Solution
 
 ## API
 
