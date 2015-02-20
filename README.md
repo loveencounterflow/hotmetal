@@ -179,8 +179,8 @@ may be one HTML fragement (not quite yet, as we'll see momentarily) to be tested
 ✚il★lus★tra★tion ✚<img src='x.jpg'>
 ```
 
-my be another one. However, just slicing such a piece out of its HTML context will not do; after all, close
-inspection reveals that in order to typeset `illustration`, we must observe that it appears inside of three
+may be another one. However, just slicing such a piece out of its HTML context will not do; as
+inspection reveals, we must observe that `illustration` appears inside of three
 tags: `<div id='mydiv'>`, `<em>`, and `<i>`. Without these tags, we can not be sure that the font selection,
 its size and style will be correct (rather, we can almost be sure they all will be incorrect in this case).
 
