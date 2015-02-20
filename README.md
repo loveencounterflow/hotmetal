@@ -4,6 +4,7 @@
 	- [Motivation](#motivation)
 	- [The Problem](#the-problem)
 	- [The Solution](#the-solution)
+	- [Why not Just Use TeX?](#why-not-just-use-tex)
 	- [API](#api)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -46,7 +47,7 @@ intended to receive lines of type, how can we make it so that
 	the length of a line?
 
 ❷ we can control where line breaks occur to optimize the appearance of a paragraph (as has been pioneered
-	by Donal Knuth's T<sub>E</sub>X typesetting system)?
+	by Donal Knuth's TeX typesetting system)?
 
 ❸ we can later distribute lines so that common taks in book layout—such as the production of balanced
 	columns, possibly with intervening illustrations—become feasible?
@@ -57,7 +58,7 @@ intended to receive lines of type, how can we make it so that
 
 The answer to problem ❶ can only be: we must actually typeset a line under 'realistic' conditions, that is,
 we must actually put the pertinent HTML tags onto an actual web page and then test whether the line is too
-short, just right, or too long. For any attempt to do it 'the T<sub>E</sub>X way'—i.e. by considering font
+short, just right, or too long. For any attempt to do it 'the TeX way'—i.e. by considering font
 metrics instead of actual fonts—is bound to ultimately reconstruct more or less the entire browser rendering
 engine in JavaScript, which is certainly too hard to be solved in a satisfactory manner.
 
@@ -80,11 +81,15 @@ simple task is surprisingly difficult when we consider just a few points:
 
 Fortunately, there has been done quite some work in the field of language processing. First, there is the
 [Unicode Line Break Algorithm (UAX #14)](http://www.unicode.org/reports/tr14) which has been implemented in
-[JavaScript as a NodeJS module](https://github.com/devongovett/linebreak) and may be installed as easy as
+[JavaScript as a NodeJS module called `linebreak`](https://github.com/devongovett/linebreak) and may be installed as easy as
 `npm install linebreak`.
+
+Second, there is [a hyphenation module, `hypher`](https://github.com/bramstein/Hypher), with [quite a few
+language-specific hyphenation patterns](https://www.npmjs.com/search?q=hyphenation) available.
 
 <!-- The approach taken  -->
 
+## Why not Just Use TeX?
 
 ## API
 
