@@ -87,6 +87,8 @@ Fortunately, there has been done quite some work in the field of language proces
 Second, there is [a hyphenation module, `hypher`](https://github.com/bramstein/Hypher), with [quite a few
 language-specific hyphenation patterns](https://www.npmjs.com/search?q=hyphenation) available.
 
+[TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
+
 <!-- The approach taken  -->
 
 ## Why not Just Use TeX?
