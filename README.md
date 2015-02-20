@@ -24,26 +24,35 @@ The [MingKwai Typesetter](https://github.com/loveencounterflow/mingkwai-app) is 
 print pages from MarkDown sources that are converted to HTML5 / CSS3, and then rendered by the browser
 component of an [nwjs (formerly node-webkit)](http://nwjs.io/) app.
 
-While the choice of HTML5, CSS3 and a web browser to typeset text is a natural one given that it is among
-the one globally most widespread text rendering technology, has been under very intense and competitive
-development for 25 years and has in the process become highly optimized and internationalized for a wide
-range of languages and scripts.
+While the choice of HTML5, CSS3 and a web browser to typeset text is a natural one given that it is the one
+globally most widespread text rendering technology, has been under very intense and competitive development
+for a quarter of a century now, and has in the process become both highly optimized and internationalized
+for a wide range of languages and scripts.
 
-However, producing masters intended to be printed to paper from a rendering in the browser window has never
-been very much in the focus of browser vendors, and, hence, many of the techniques developed by writers and
-printers over the centuries have received a rather negligent treatment, one example being fine control over
-how lines are broken into paragraphs, and the typesetting of columns.
+However, producing print masters from a rendering in the browser window has never been very much in the
+focus of vendors, and, hence, many of the techniques developed by printers have received a rather negligent
+treatment, one example being fine control over how lines are broken into paragraphs, and the typesetting of
+columns.
 
-Fortunately, we have a wonderful and versatile programming language—JavaScript—that is closely wedded to
-the Document Object Model (DOM) that has become the go-to solution to fill out any gaps that HTML and
-CSS still have.
+Fortunately, there is a wonderful and versatile programming language—JavaScript—that is closely wedded to
+the Document Object Model (DOM) that can be used to fill out any gaps of HTML and CSS.
 
-<!-- The approach taken  -->
+The particular problem that HoTMtaL is intended to solve can be stated as follows: Given the source of an
+HTML paragraph, some collection of CSS style rules and an HTML layout which contains a block element
+intended to receive lines of type, how can we make it so that
 
+**(1)** we can tell whether a given portion of the paragraph fits into the receiving container without
+	occupying more than a single line and without containing less material than wozuld be possible, given
+	the length of a line?
+
+**(2)** we can control where line breaks occur?
 
 
 
 ## The Solution
+
+<!-- The approach taken  -->
+
 
 ## API
 
