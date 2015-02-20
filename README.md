@@ -99,7 +99,8 @@ may be broken. For example, the nonsense text:
 will be partioned as
 
 ```
-[ 'Para­', 'graph ', 'in­', 'ter­', 'na­', 'tion­', 'al­', 'iza­', 'tion ', 'as­', 'sign­', 'ment ', '(cer­', 'tainly) ', 'rel­', 'a­', 'tiv­', 'ity.', ]
+[ 'Para­★', 'graph ', 'in­★', 'ter★­', 'na★­', 'tion★­', 'al­★', 'iza★­', 'tion ', 'as★­', 'sign★­', 'ment ',
+	'(cer★­', 'tainly) ', 'rel★­', 'a★­', 'tiv★­', 'ity.', ]
 ```
 
 [TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
