@@ -11,6 +11,8 @@
 
 # HoTMtaL
 
+![](https://github.com/loveencounterflow/hotmetal/raw/master/art/Linotype_matrices.png)
+
 ## Motivation
 
 HoTMtaL has been developed to simplify the finding of good line breaks in HTML sources; this is a core
