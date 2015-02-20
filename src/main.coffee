@@ -307,7 +307,7 @@ $                         = D.remit.bind D
   H.parse html, ( error, hotml ) =>
     throw error if error?
     for start in [ 0, 3, 10, ]
-      for delta in [ 0 .. 5 ]
+      for delta in [ 0 .. 15 ]
         stop = start + delta
         # urge start, stop, H.rpr      H.slice hotml, start, stop
         info start, stop, H.as_html  H.slice hotml, start, stop

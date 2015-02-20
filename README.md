@@ -43,14 +43,14 @@ HTML paragraph, some collection of CSS style rules and an HTML layout which cont
 intended to receive lines of type, how can we make it so that
 
 ❶ we can tell whether a given portion of the paragraph fits into the receiving container without
-	occupying more than a single line and without containing less material than would be possible, given
-	the length of a line?
+  occupying more than a single line and without containing less material than would be possible, given
+  the length of a line?
 
 ❷ we can control where line breaks occur to optimize the appearance of a paragraph (as has been pioneered
-	by Donal Knuth's TeX typesetting system)?
+  by Donal Knuth's TeX typesetting system)?
 
 ❸ we can later distribute lines so that common taks in book layout—such as the production of balanced
-	columns, possibly with intervening illustrations—become feasible?
+  columns, possibly with intervening illustrations—become feasible?
 
 
 
@@ -67,19 +67,19 @@ line breaks are permitted, given the combination of script and language at a giv
 simple task is surprisingly difficult when we consider just a few points:
 
 * In an English text, we require that properly formatted texts use hyphens at the end of lines where
-	otherwise a long word would cause an overly short line; those hyphens must only occur where permitted
-	by intricate rules (which may not entirely lent themselves to a formalization and may require lists
-	of difficult cases and exceptions as dictated by common usage);
+  otherwise a long word would cause an overly short line; those hyphens must only occur where permitted
+  by intricate rules (which may not entirely lent themselves to a formalization and may require lists
+  of difficult cases and exceptions as dictated by common usage);
 
 * In more traditionally typeset Chinese texts, all the characters, including punctuation, are expected to
-	take up the exact same space, so that the result displays a rigid grid. Line breaks may occur at any
-	point between any two characters; it may even be permitted to have a trailing period as the first
-	(and, at the end of a paragraph, only) character on a line (in more modern Chinese texts, the tendency
-	seems to be to abandon the strict grid in favor of variable spacing between characters and give less
-	room to punctuation).
+  take up the exact same space, so that the result displays a rigid grid. Line breaks may occur at any
+  point between any two characters; it may even be permitted to have a trailing period as the first
+  (and, at the end of a paragraph, only) character on a line (in more modern Chinese texts, the tendency
+  seems to be to abandon the strict grid in favor of variable spacing between characters and give less
+  room to punctuation).
 
 * Other languages may use other devices such as elongated characters or, (as in Thai) inner-word breaks
-	without hyphens that may, however, only occur at syllable boundaries.
+  without hyphens that may, however, only occur at syllable boundaries.
 
 Fortunately, there has been done quite some work in the field of language processing. First, there is the
 [Unicode Line Break Algorithm (UAX #14)](http://www.unicode.org/reports/tr14) which has been implemented in
@@ -99,8 +99,20 @@ may be broken. For example, the nonsense text:
 will be partioned as
 
 ```
-[ 'Para­★', 'graph ', 'in­★', 'ter★­', 'na★­', 'tion★­', 'al­★', 'iza★­', 'tion ', 'as★­', 'sign★­', 'ment ',
-	'(cer★­', 'tainly) ', 'rel★­', 'a★­', 'tiv★­', 'ity.', ]
+[ 'Para­★', 'graph ', 'in­★', 'ter★­', 'na★­', 'tion★­', 'al­★', 'iza★­', 'tion ',
+  'as★­', 'sign★­', 'ment ', '(cer★­', 'tainly) ', 'rel★­', 'a★­', 'tiv★­', 'ity.', ]
+```
+
+where the stars `★` indicate 'soft hyphens' (i.e. hyphens that will only be shown when occurring at the end
+of the line). We can, then, take such a partitioning and apply it successively to a web page
+
+```
+Para-
+Paragraph
+Paragraph in-
+Paragraph inter-
+Paragraph interna-
+...
 ```
 
 [TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
