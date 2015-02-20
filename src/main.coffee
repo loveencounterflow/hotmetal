@@ -304,6 +304,7 @@ $                         = D.remit.bind D
   html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration
   <b>bromance</b> cyberspace <span class='foo'></span> necessarily</i></em> completely.</div>"""
   html = """Paragraph internationalization assignment (certainly) relativity."""
+  html = """https://github.com/devongovett/linebreak"""
   H.parse html, ( error, hotml ) =>
     throw error if error?
     for start in [ 0, 3, 10, ]

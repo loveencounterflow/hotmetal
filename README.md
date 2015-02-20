@@ -109,27 +109,6 @@ of the line).
 Assuming the existence of method to test whether a given text takes up a single or more than a single line
 in the browser, we can, then, take such a partitioning and apply it successively to a web page:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
 ➀ ✅ Para-
 ➅ ✅ Paragraph
@@ -142,6 +121,15 @@ in the browser, we can, then, take such a partitioning and apply it successively
 ➃ ❌ Paragraph internationalization
 ➂ ❌ Paragraph internationalization as-
 ```
+
+A relatively naive method to distribute material accross lines then just tests consecutive lines of
+increasing lengths; as soon as it finds the first line that occupies more than a single line, it will accept
+the 'last good line' (i.e. the previous line) and re-start the cycle, beginning with the part that caused
+the line to become too long (in our case, line ➄ will end up to be typeset, followed by a line that starts
+with `Paragraph internationaliza-`). Of course, there may always be unbreakable portions that are too long
+for a single line; in such cases, we could typeset that line anyway and issue a quality warning so the user
+is alerted and gets a chance to fix things whichever way they see fit.
+
 
 [TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
 
