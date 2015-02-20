@@ -42,16 +42,46 @@ HTML paragraph, some collection of CSS style rules and an HTML layout which cont
 intended to receive lines of type, how can we make it so that
 
 ❶ we can tell whether a given portion of the paragraph fits into the receiving container without
-	occupying more than a single line and without containing less material than wozuld be possible, given
+	occupying more than a single line and without containing less material than would be possible, given
 	the length of a line?
 
-❷ we can control where line breaks occur?
+❷ we can control where line breaks occur to optimize the appearance of a paragraph (as has been pioneered
+	by Donal Knuth's T<sub>E</sub>X typesetting system)?
 
-❸
+❸ we can later distribute lines so that common taks in book layout—such as the production of balanced
+	columns, possibly with intervening illustrations—become feasible?
 
 
 
 ## The Solution
+
+The answer to problem ❶ can only be: we must actually typeset a line under 'realistic' conditions, that is,
+we must actually put the pertinent HTML tags onto an actual web page and then test whether the line is too
+short, just right, or too long. For any attempt to do it 'the T<sub>E</sub>X way'—i.e. by considering font
+metrics instead of actual fonts—is bound to ultimately reconstruct more or less the entire browser rendering
+engine in JavaScript, which is certainly too hard to be solved in a satisfactory manner.
+
+The (partial) answer to problem ❷ is that we must find all those positions in a given HTML source text where
+line breaks are permitted, given the combination of script and language at a given point. This seemingly
+simple task is surprisingly difficult when we consider just a few points:
+
+* in an English text, we require that properly formatted texts use hyphens at the end of lines where
+	otherwise a long word would cause an overly short line; those hyphens must only occur where permitted
+	by intricate rules (which may not entirely lent themselves to a formalization and may require lists
+	of difficult cases and exceptions as dictated by common usage);
+
+* In more traditionally typeset Chinese texts, all the characters, including punctuation, are expected to
+	take up the exact same space, so that the result displays a rigid grid. Line breaks may occur at any
+	point between any two characters; it may even be permitted to have a trailing period as the first
+	(and, at the end of a paragraph, only) character on a line.
+
+* Other languages may use other devices such as elongated characters or, (as in Thai) inner-word breaks
+	without hyphens that may, however, only occur at syllable boundaries.
+
+Fortunately, there has been done quite some work in the field of language processing. First, there is the
+[Unicode Line Break Algorithm (UAX #14)](http://www.unicode.org/reports/tr14) which has been implemented in
+[JavaScript as a NodeJS module](https://github.com/devongovett/linebreak) and may be installed as easy as
+`npm install linebreak`.
 
 <!-- The approach taken  -->
 
