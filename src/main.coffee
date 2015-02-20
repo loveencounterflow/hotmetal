@@ -29,13 +29,44 @@ $                         = D.remit.bind D
 @as_html = ( me ) ->
   R                       = []
   [ list_of_open_tags
-    texts
+    _
     list_of_close_tags  ] = me
+  texts                   = @_get_corrected_texts me
+  # debug '©G3WbH', JSON.stringify texts
   for text, idx in texts
     R.push t for t in list_of_open_tags[ idx ]
     R.push text
     R.push t for t in list_of_close_tags[ idx ]
   return R.join ''
+
+#-----------------------------------------------------------------------------------------------------------
+@_get_corrected_texts = ( me ) ->
+  [ list_of_open_tags
+    texts
+    list_of_close_tags  ] = me
+  R                       = []
+  first_idx               = +Infinity
+  last_idx                = -Infinity
+  #.........................................................................................................
+  for text, idx in texts
+    if text.length > 0 and text[ 0 ] != '<'
+      first_idx = Math.min idx, first_idx
+      last_idx  = Math.max idx, last_idx
+  # debug '©c9hEz', JSON.stringify texts
+  # debug '©vPXZn', first_idx, last_idx
+  #.........................................................................................................
+  for text, idx in texts
+    if text.length > 0 and text[ 0 ] != '<'
+      shy_replacement = if idx is last_idx then '-' else ''
+      text            = text.replace /\xad$/, shy_replacement
+      text            = text.replace /\s+$/, '' if idx is last_idx
+      text            = text.replace /&/g, '&amp;'
+      text            = text.replace /</g, '&lt;'
+      text            = text.replace />/g, '&gt;'
+    R.push text
+  #.........................................................................................................
+  R[ first_idx ] = R[ first_idx ].replace /^\s+/ if R[ first_idx ]?
+  return R
 
 
 #===========================================================================================================
@@ -74,7 +105,7 @@ $                         = D.remit.bind D
 @_new_hotml = -> [ [], [], [], ]
 
 #===========================================================================================================
-#
+# SLICING
 #-----------------------------------------------------------------------------------------------------------
 @slice = ( me, start, stop ) ->
   ### `i` for input ###
@@ -175,7 +206,6 @@ $                         = D.remit.bind D
   input
     .pipe D.HTML.$parse()
     .pipe D.HTML.$collect_texts()
-    .pipe D.$show()
     #.......................................................................................................
     .pipe do =>
       [ open_tags
@@ -273,10 +303,11 @@ $                         = D.remit.bind D
   html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration <b>bromance</b> cyberspace <span class='foo'></span> dean</i></em> eps foo gig hey</div>"""
   @parse html, ( error, hotml ) =>
     throw error if error?
-    start = 5
-    for stop in [ 5 .. 9 ]
-      urge start, stop, @rpr      @slice hotml, start, stop
-      info start, stop, @as_html  @slice hotml, start, stop
+    for start in [ 0, 3, 10, ]
+      for delta in [ 0 .. 5 ]
+        stop = start + delta
+        # urge start, stop, @rpr      @slice hotml, start, stop
+        info start, stop, @as_html  @slice hotml, start, stop
     urge JSON.stringify hotml
     help @rpr     hotml
     info @as_html hotml
