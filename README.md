@@ -139,13 +139,22 @@ paragraphs with a lot of hyphenations where a slight adjustment would have yield
 paragraphs where spaces happen to occur at similar places in adjacent lines, which produces unsightly
 'rivers' of whitespace. But its simplicity and unassuming generality are still attractive; also, it seems to
 produce acceptable results in reasonable environments (where the length of words is not too long compared to
-the length of the lines).
+the length of the lines). Be it said that it appears to work correctly for English, Chinese, Tibetan, and
+Korean; for Thai, a syllable-segmentizer would be needed. This is already quite an achievement given that
+it was possible to do with installing a mere two open-source modules from `npm`!
 
-A development left for the future is the adaption of the [TeX (Knuth & Plass) line breaking
-algorithm](https://github.com/bramstein/typeset) for the use in HoTMetaL
+One development left for the future is the adaption of the [TeX (Knuth & Plass) line breaking
+algorithm](https://github.com/bramstein/typeset) for the use in HoTMetaL; as it stands, said package uses an
+HTML `<canvas>` element to test for line lengths, which is a limitation that has become unnecessary.
+
+Another worthwhile future development may be to implement so-called optical margin alignment, also known as
+hanging indentation. Because punctuation (and parts of other characters) are allowed to occupy some space in
+the margin, optical alignment does not only achieve a smoother ocerall impression, it also ever so slightly
+the effective line lengths, which should contribute to a more balanced spacing.
 
 ### HTML Partitioning
-<!-- The approach taken  -->
+
+It has already been said that in order to correctly test for line lengths
 
 ## Why not Just Use TeX?
 
