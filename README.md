@@ -1,22 +1,24 @@
 
 
-- [HoTMtaL](#hotmtal)
+- [HoTMetaL](#hotmetal)
 	- [Motivation](#motivation)
 	- [The Problem](#the-problem)
 	- [The Solution](#the-solution)
+		- [Text Partitioning](#text-partitioning)
+		- [HTML Partitioning](#html-partitioning)
 	- [Why not Just Use TeX?](#why-not-just-use-tex)
 	- [API](#api)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 
-# HoTMtaL
+# HoTMetaL
 
 ![](https://github.com/loveencounterflow/hotmetal/raw/master/art/Linotype_matrices.png)
 
 ## Motivation
 
-HoTMtaL has been developed to simplify the finding of good line breaks in HTML sources; this is a core
+HoTMetaL has been developed to simplify the finding of good line breaks in HTML sources; this is a core
 ingredient for the [MingKwai Typesetter](https://github.com/loveencounterflow/mingkwai-app).
 
 ## The Problem
@@ -38,7 +40,7 @@ columns.
 Fortunately, there is a wonderful and versatile programming language—JavaScript—that is closely wedded to
 the Document Object Model (DOM) that can be used to fill out any gaps of HTML and CSS.
 
-The particular problem that HoTMtaL is intended to solve can be stated as follows: Given the source of an
+The particular problem that HoTMetaL is intended to solve can be stated as follows: Given the source of an
 HTML paragraph, some collection of CSS style rules and an HTML layout which contains a block element
 intended to receive lines of type, how can we make it so that
 
@@ -81,6 +83,8 @@ simple task is surprisingly difficult when we consider just a few points:
 * Other languages may use other devices such as elongated characters or, (as in Thai) inner-word breaks
   without hyphens that may, however, only occur at syllable boundaries.
 
+### Text Partitioning
+
 Fortunately, there has been done quite some work in the field of language processing. First, there is the
 [Unicode Line Break Algorithm (UAX #14)](http://www.unicode.org/reports/tr14) which has been implemented in
 [JavaScript as a NodeJS module called `linebreak`](https://github.com/devongovett/linebreak) and may be
@@ -122,17 +126,25 @@ in the browser, we can, then, take such a partitioning and apply it successively
 ➂ ❌ Paragraph internationalization as-
 ```
 
-A relatively naive method to distribute material accross lines then just tests consecutive lines of
-increasing lengths; as soon as it finds the first line that occupies more than a single line, it will accept
-the 'last good line' (i.e. the previous line) and re-start the cycle, beginning with the part that caused
-the line to become too long (in our case, line ➄ will end up to be typeset, followed by a line that starts
-with `Paragraph internationaliza-`). Of course, there may always be unbreakable portions that are too long
-for a single line; in such cases, we could typeset that line anyway and issue a quality warning so the user
-is alerted and gets a chance to fix things whichever way they see fit.
+A naive method to distribute material accross lines then just tests consecutive lines of increasing lengths;
+as soon as it finds the first line that occupies more than a single line, it will accept the 'last good
+line' (i.e. the previous line) and re-start the cycle, beginning with the part that caused the line to
+become too long (in our case, line ➄ will end up to be typeset, followed by a line that starts with
+`Paragraph internationaliza-`). Of course, there may always be unbreakable portions that are too long for a
+single line; in such cases, we could typeset that line anyway and issue a quality warning so the user is
+alerted and gets a chance to fix things whichever way they see fit.
 
+It's easy to see that the naive method will sometimes produce a fair number of consecutive hyphens,
+paragraphs with a lot of hyphenations where a slight adjustment would have yielded less hyphenations, and
+paragraphs where spaces happen to occur at similar places in adjacent lines, which produces unsightly
+'rivers' of whitespace. But its simplicity and unassuming generality are still attractive; also, it seems to
+produce acceptable results in reasonable environments (where the length of words is not too long compared to
+the length of the lines).
 
-[TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
+A development left for the future is the adaption of the [TeX (Knuth & Plass) line breaking
+algorithm](https://github.com/bramstein/typeset) for the use in HoTMetaL
 
+### HTML Partitioning
 <!-- The approach taken  -->
 
 ## Why not Just Use TeX?
