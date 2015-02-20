@@ -104,15 +104,43 @@ will be partioned as
 ```
 
 where the stars `★` indicate 'soft hyphens' (i.e. hyphens that will only be shown when occurring at the end
-of the line). We can, then, take such a partitioning and apply it successively to a web page
+of the line).
+
+Assuming the existence of method to test whether a given text takes up a single or more than a single line
+in the browser, we can, then, take such a partitioning and apply it successively to a web page:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```
-Para-
-Paragraph
-Paragraph in-
-Paragraph inter-
-Paragraph interna-
-...
+➀ ✔ Para-
+➅ ✔ Paragraph
+➆ ✔ Paragraph in-
+➇ ✔ Paragraph inter-
+➈ ✔ Paragraph interna-
+➉ ✔ Paragraph internation-
+➁ ✔ Paragraph international-
+➄ ❌ Paragraph internationaliza-
+➃ ❌ Paragraph internationalization
+➂ ❌ Paragraph internationalization as-
 ```
 
 [TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
