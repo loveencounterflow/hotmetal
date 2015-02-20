@@ -66,7 +66,7 @@ The (partial) answer to problem ❷ is that we must find all those positions in 
 line breaks are permitted, given the combination of script and language at a given point. This seemingly
 simple task is surprisingly difficult when we consider just a few points:
 
-* in an English text, we require that properly formatted texts use hyphens at the end of lines where
+* In an English text, we require that properly formatted texts use hyphens at the end of lines where
 	otherwise a long word would cause an overly short line; those hyphens must only occur where permitted
 	by intricate rules (which may not entirely lent themselves to a formalization and may require lists
 	of difficult cases and exceptions as dictated by common usage);
@@ -74,18 +74,33 @@ simple task is surprisingly difficult when we consider just a few points:
 * In more traditionally typeset Chinese texts, all the characters, including punctuation, are expected to
 	take up the exact same space, so that the result displays a rigid grid. Line breaks may occur at any
 	point between any two characters; it may even be permitted to have a trailing period as the first
-	(and, at the end of a paragraph, only) character on a line.
+	(and, at the end of a paragraph, only) character on a line (in more modern Chinese texts, the tendency
+	seems to be to abandon the strict grid in favor of variable spacing between characters and give less
+	room to punctuation).
 
 * Other languages may use other devices such as elongated characters or, (as in Thai) inner-word breaks
 	without hyphens that may, however, only occur at syllable boundaries.
 
 Fortunately, there has been done quite some work in the field of language processing. First, there is the
 [Unicode Line Break Algorithm (UAX #14)](http://www.unicode.org/reports/tr14) which has been implemented in
-[JavaScript as a NodeJS module called `linebreak`](https://github.com/devongovett/linebreak) and may be installed as easy as
-`npm install linebreak`.
+[JavaScript as a NodeJS module called `linebreak`](https://github.com/devongovett/linebreak) and may be
+installed as easy as `npm install linebreak`.
 
 Second, there is [a hyphenation module, `hypher`](https://github.com/bramstein/Hypher), with [quite a few
 language-specific hyphenation patterns](https://www.npmjs.com/search?q=hyphenation) available.
+
+The combination of `hypher` and `linebreak` allows us to find all positions where e.g. an English text
+may be broken. For example, the nonsense text:
+
+```
+'Paragraph internationalization assignment (certainly) relativity.'
+```
+
+will be partioned as
+
+```
+[ 'Para­', 'graph ', 'in­', 'ter­', 'na­', 'tion­', 'al­', 'iza­', 'tion ', 'as­', 'sign­', 'ment ', '(cer­', 'tainly) ', 'rel­', 'a­', 'tiv­', 'ity.', ]
+```
 
 [TeX (Knuth & Plass) line breaking algorithm](https://github.com/bramstein/typeset)
 

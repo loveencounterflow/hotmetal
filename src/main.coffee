@@ -236,7 +236,7 @@ $                         = D.remit.bind D
           #.................................................................................................
           when 'text'
             text_parts  = D.break_lines hyphenate tail[ 0 ]
-            # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
+            debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
             switch last_type
               #.............................................................................................
               when null, 'close-tag', 'lone-tag', 'text'
@@ -303,6 +303,7 @@ $                         = D.remit.bind D
   H = @
   html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration
   <b>bromance</b> cyberspace <span class='foo'></span> necessarily</i></em> completely.</div>"""
+  html = """Paragraph internationalization assignment (certainly) relativity."""
   H.parse html, ( error, hotml ) =>
     throw error if error?
     for start in [ 0, 3, 10, ]
