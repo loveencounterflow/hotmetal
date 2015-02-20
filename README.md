@@ -154,7 +154,17 @@ the effective line lengths, which should contribute to a more balanced spacing.
 
 ### HTML Partitioning
 
-It has already been said that in order to correctly test for line lengths
+It has already been said that in order to correctly test for line lengths, we must produce (partial) lines
+under 'realistic' conditions; in other words, it will be necessary to put all of the HTML tags onto the web
+page that are in effect for the portion in question. To clarify the problem, let's have a look at another
+nonsense snippet of text, this time with peppered wiht meaningless, random tags. In this sample, breakpoints
+with soft hyphens are again indicated with `★`, while breakpoints without hyphens are marked ✚.
+
+```
+Lo ✚<div id='mydiv'><em><i>✚ar★cade ✚&amp; ✚&#x4e00; ✚il★lus★tra★tion ✚<img src='x.jpg'>
+  ✚<b>bro★mance</b>✚ cy★ber★space ✚<span class='foo'></span>✚ nec★es★sar★ily</i></em>✚ com★ple★te★ly.</div>
+```
+
 
 ## Why not Just Use TeX?
 
