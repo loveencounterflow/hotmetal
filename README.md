@@ -169,7 +169,7 @@ Now, since we do not know beforehand anything about font metrics, lines could up
 font faces, font sizes, font styles, borders, image sizes—in other words, we must assume that each potential
 breakpoint may become an actual breakpoint. Thus, for example,
 
-```
+```html
 ✚il★lus★tra★tion ✚
 ```
 
@@ -194,8 +194,26 @@ others; these act as indivisible units and do not have a corresponding closing t
 For example, when testing the word `gnu` as it appears in this HTML:
 
 ```html
-foo <b> bar <i>baz</i> gnu<b>
+foo <b> bar <i>baz</i> gnu frob</b>
 ```
+
+we see that it is preceded by a closing tag `</i>` which, as long as the HTML source is grammatically
+correct, means that we can safely ignore the next opening tag; indeed, it turns out to be `<i>`. The
+When we hit upon the `<b>` tag, we have to take it into consideration as it is not closed with our
+scope so far. Therefore, our HTML fragment becomes `<b>gnu</b>` (with the trailing space elided).
+Likewise, our two earlier examples become
+
+```html
+<div id='mydiv'><em><i>illustration</i></em></div>
+```
+
+and
+
+```html
+<div id='mydiv'><em><i>illustration <img src='x.jpg'></i></em></div>
+```
+
+respectively.
 
 ## Why not Just Use TeX?
 
