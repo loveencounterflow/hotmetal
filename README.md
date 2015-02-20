@@ -158,13 +158,44 @@ It has already been said that in order to correctly test for line lengths, we mu
 under 'realistic' conditions; in other words, it will be necessary to put all of the HTML tags onto the web
 page that are in effect for the portion in question. To clarify the problem, let's have a look at another
 nonsense snippet of text, this time with peppered wiht meaningless, random tags. In this sample, breakpoints
-with soft hyphens are again indicated with `★`, while breakpoints without hyphens are marked ✚.
+with soft hyphens are again indicated with `★`, while breakpoints without hyphens are marked ✚:
 
-```
+```html
 Lo ✚<div id='mydiv'><em><i>✚ar★cade ✚&amp; ✚&#x4e00; ✚il★lus★tra★tion ✚<img src='x.jpg'>
   ✚<b>bro★mance</b>✚ cy★ber★space ✚<span class='foo'></span>✚ nec★es★sar★ily</i></em>✚ com★ple★te★ly.</div>
 ```
 
+Now, since we do not know beforehand anything about font metrics, lines could up anywhere, depending on
+font faces, font sizes, font styles, borders, image sizes—in other words, we must assume that each potential
+breakpoint may become an actual breakpoint. Thus, for example,
+
+```
+✚il★lus★tra★tion ✚
+```
+
+may be one HTML fragement (not quite yet, as we'll see momentarily) to be tested, and
+
+```html
+✚il★lus★tra★tion ✚<img src='x.jpg'>
+```
+
+my be another one. However, just slicing such a piece out of its HTML context will not do; after all, close
+inspection reveals that in order to typeset `illustration`, we must observe that it appears inside of three
+tags: `<div id='mydiv'>`, `<em>`, and `<i>`. Without these tags, we can not be sure that the font selection,
+its size and style will be correct (rather, we can almost be sure they all will be incorrect in this case).
+
+Therefore, it becomes necessary to walk back through the HTML structure and look for all the closing and
+opening tags. Since HTML tags must always be openend and closed in a symmetric fashion, we know that
+we only have to look for openening tags that do not correspond to a closing text. Also, we must close
+all tags that have not already been closed when we're done with the relevant text portion. An additional
+complication comes with the so-called 'self-closing tags' of HTML5, such as `<br>`, `<hr>`, `<img>` and
+others; these act as indivisible units and do not have a corresponding closing tag.
+
+For example, when testing the word `gnu` as it appears in this HTML:
+
+```html
+foo <b> bar <i>baz</i> gnu<b>
+```
 
 ## Why not Just Use TeX?
 
