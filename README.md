@@ -131,13 +131,13 @@ in the browser, we can, then, take such a partitioning and apply it successively
 
 
 ```
-➀ ✔ Para-
-➅ ✔ Paragraph
-➆ ✔ Paragraph in-
-➇ ✔ Paragraph inter-
-➈ ✔ Paragraph interna-
-➉ ✔ Paragraph internation-
-➁ ✔ Paragraph international-
+➀ ✅ Para-
+➅ ✅ Paragraph
+➆ ✅ Paragraph in-
+➇ ✅ Paragraph inter-
+➈ ✅ Paragraph interna-
+➉ ✅ Paragraph internation-
+➁ ✅ Paragraph international-
 ➄ ❌ Paragraph internationaliza-
 ➃ ❌ Paragraph internationalization
 ➂ ❌ Paragraph internationalization as-
