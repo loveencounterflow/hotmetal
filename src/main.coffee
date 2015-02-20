@@ -300,17 +300,19 @@ $                         = D.remit.bind D
 # DEMO
 #-----------------------------------------------------------------------------------------------------------
 @demo = ->
-  html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration <b>bromance</b> cyberspace <span class='foo'></span> dean</i></em> eps foo gig hey</div>"""
-  @parse html, ( error, hotml ) =>
+  H = @
+  html = """<img src='x.jpg'>lo <div id='mydiv'><em><i>arcade &amp; &#x4e00; illustration
+  <b>bromance</b> cyberspace <span class='foo'></span> necessarily</i></em> completely.</div>"""
+  H.parse html, ( error, hotml ) =>
     throw error if error?
     for start in [ 0, 3, 10, ]
       for delta in [ 0 .. 5 ]
         stop = start + delta
-        # urge start, stop, @rpr      @slice hotml, start, stop
-        info start, stop, @as_html  @slice hotml, start, stop
+        # urge start, stop, H.rpr      H.slice hotml, start, stop
+        info start, stop, H.as_html  H.slice hotml, start, stop
     urge JSON.stringify hotml
-    help @rpr     hotml
-    info @as_html hotml
+    help H.rpr     hotml
+    info H.as_html hotml
 
 
 ############################################################################################################
