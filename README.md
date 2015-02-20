@@ -41,11 +41,13 @@ The particular problem that HoTMtaL is intended to solve can be stated as follow
 HTML paragraph, some collection of CSS style rules and an HTML layout which contains a block element
 intended to receive lines of type, how can we make it so that
 
-**(1)** we can tell whether a given portion of the paragraph fits into the receiving container without
+❶ we can tell whether a given portion of the paragraph fits into the receiving container without
 	occupying more than a single line and without containing less material than wozuld be possible, given
 	the length of a line?
 
-**(2)** we can control where line breaks occur?
+❷ we can control where line breaks occur?
+
+❸
 
 
 
