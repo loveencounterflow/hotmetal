@@ -218,6 +218,29 @@ respectively.
 
 ### The HoTMetaL Data Structure
 
+**very** nice *and* also good
+
+`<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">`
+
+```
+0______ 1________________ 2___
+<p>,<b> very_____________ </b>
+_______ nice_____________ ____
+<i>____ and______________ </i>
+_______ also_____________ ____
+_______ good_____________ ____
+_______ <img src="x.jpg"> </p>
+```
+
+```coffee
+[ [ [ '<p>', '<b>' ], 'very',   [ '</b>' ], ],
+  [ [],               ' nice ', [],         ],
+  [ [ '<i>' ],        'and',    [ '</i>' ], ],
+  [ [],               ' also ', [],         ],
+  [ [],               'good ',  [],         ],
+  [ [],               '<img src="x.jpg">', [ '</p>' ] ] ]
+```
+
 ![](https://github.com/loveencounterflow/hotmetal/raw/master/art/hotmetal.png)
 
 ## Why not Just Use TeX?
