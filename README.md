@@ -7,8 +7,8 @@
 		- [Text Partitioning](#text-partitioning)
 		- [HTML Partitioning](#html-partitioning)
 		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
-	- [Why not Just Use TeX?](#why-not-just-use-tex)
-	- [API](#api)
+- [list structure, formatted for readability](#list-structure-formatted-for-readability)
+- [as rendered by `HOTMETAL.rpr()`:](#as-rendered-by-hotmetalrpr)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -219,13 +219,41 @@ respectively.
 
 ### The HoTMetaL Data Structure
 
-The
+In order to make slicing and dicing of HTML a straightforward matter, HoTMetaL will parse HTML and turn
+it into ordinary lists (i.e. JavaScript arrays). In such a list, each breakpoint corresponds to one list
+element which is represented by a triplet representing opening tags, the text (or lone tag), and the closing
+tags. Opening and closing tags are again represented as lists; all tags appear in the order they appear
+in the document. To clarify, here are three equivalent views on the HoTMetaL list that results from parsing
+this HTML:
+
 
 ```html
 <p><b>very</b> nice <i>and</i> also good <img src="x.jpg">
 ```
 
-```
+Feeding this source to `HOTMETAL.parse()`, we have three ways to print out the resulting structure:
+
+```coffee
+html  = """<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">"""
+HOTMETAL.parse html, ( error, hotml ) ->
+  throw error if error?
+  console.log                   hotml
+  console.log HOTMETAL.rpr      hotml
+  console.log HOTMETAL.as_html  hotml
+
+
+
+```coffee
+# list structure, formatted for readability
+
+[ [ [ '<p>', '<b>' ], 'very',              [ '</b>' ], ],
+  [ [],               ' nice ',            [],         ],
+  [ [ '<i>' ],        'and',               [ '</i>' ], ],
+  [ [],               ' also ',            [],         ],
+  [ [],               'good ',             [],         ],
+  [ [],               '<img src="x.jpg">', [ '</p>' ] ] ]
+
+# as rendered by `HOTMETAL.rpr()`:
 0______ 1________________ 2___
 <p>,<b> very_____________ </b>
 _______ nice_____________ ____
@@ -233,15 +261,6 @@ _______ nice_____________ ____
 _______ also_____________ ____
 _______ good_____________ ____
 _______ <img src="x.jpg"> </p>
-```
-
-```coffee
-[ [ [ '<p>', '<b>' ], 'very',              [ '</b>' ], ],
-  [ [],               ' nice ',            [],         ],
-  [ [ '<i>' ],        'and',               [ '</i>' ], ],
-  [ [],               ' also ',            [],         ],
-  [ [],               'good ',             [],         ],
-  [ [],               '<img src="x.jpg">', [ '</p>' ] ] ]
 ```
 
 ![](https://github.com/loveencounterflow/hotmetal/raw/master/art/hotmetal.png)
