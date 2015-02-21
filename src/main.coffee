@@ -3,7 +3,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'scratch'
+badge                     = 'HOTMETAL'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -18,7 +18,6 @@ TEACUP                    = require 'coffeenode-teacup'
 D                         = require 'pipedreams2'
 $                         = D.remit.bind D
 
-
 #===========================================================================================================
 # HELPERS
 #-----------------------------------------------------------------------------------------------------------
@@ -27,45 +26,29 @@ $                         = D.remit.bind D
 
 #-----------------------------------------------------------------------------------------------------------
 @as_html = ( me ) ->
-  R                       = []
-  [ list_of_open_tags
-    _
-    list_of_close_tags  ] = me
-  texts                   = @_get_corrected_texts me
-  # debug '©G3WbH', JSON.stringify texts
-  for text, idx in texts
-    R.push t for t in list_of_open_tags[ idx ]
-    R.push text
-    R.push t for t in list_of_close_tags[ idx ]
+  R = []
+  for chunk, idx in me
+    [ open_tags, text, close_tags, ] = chunk
+    R.push t for t in open_tags
+    R.push @_correct_text me, chunk, idx
+    R.push t for t in close_tags
   return R.join ''
 
 #-----------------------------------------------------------------------------------------------------------
-@_get_corrected_texts = ( me ) ->
-  [ list_of_open_tags
-    texts
-    list_of_close_tags  ] = me
-  R                       = []
-  first_idx               = +Infinity
-  last_idx                = -Infinity
+@_correct_text = ( me, chunk, idx ) ->
+  [ open_tags, text, close_tags, ] = chunk
+  return text if text.length > 0 and text[ 0 ] is '<'
+  is_last = idx is me.length - 1
   #.........................................................................................................
-  for text, idx in texts
-    if text.length > 0 and text[ 0 ] != '<'
-      first_idx = Math.min idx, first_idx
-      last_idx  = Math.max idx, last_idx
-  # debug '©c9hEz', JSON.stringify texts
-  # debug '©vPXZn', first_idx, last_idx
+  R = text
+  R = R.replace /\xad$/,    if is_last then '-' else ''
+  R = R.replace /\s+$/, ''  if is_last
+  ### TAINT must escape HTML special chrs ###
+  # R               = R.replace /&/g, '&amp;'
+  # R               = R.replace /</g, '&lt;'
+  # R               = R.replace />/g, '&gt;'
   #.........................................................................................................
-  for text, idx in texts
-    if text.length > 0 and text[ 0 ] != '<'
-      shy_replacement = if idx is last_idx then '-' else ''
-      text            = text.replace /\xad$/, shy_replacement
-      text            = text.replace /\s+$/, '' if idx is last_idx
-      text            = text.replace /&/g, '&amp;'
-      text            = text.replace /</g, '&lt;'
-      text            = text.replace />/g, '&gt;'
-    R.push text
-  #.........................................................................................................
-  R[ first_idx ] = R[ first_idx ].replace /^\s+/ if R[ first_idx ]?
+  # R[ first_idx ] = R[ first_idx ].replace /^\s+/ if R[ first_idx ]?
   return R
 
 
@@ -88,83 +71,48 @@ $                         = D.remit.bind D
   return TEACUP.render => TEACUP.TAG name, attributes
 
 
-# #===========================================================================================================
-# # TEXT HYPHENATION
-# #-----------------------------------------------------------------------------------------------------------
-# @_$hyphenate = ( P... ) ->
-#   hyphenate = D.new_hyphenator P...
-#   #.........................................................................................................
-#   return $ ( event, send ) =>
-#     event[ 1 ] = hyphenate event[ 1 ] if event[ 0 ] is 'text'
-#     send event
-
-
 #===========================================================================================================
 # POD CREATION
 #-----------------------------------------------------------------------------------------------------------
-@_new_hotml = -> [ [], [], [], ]
+@_new_hotml     = -> []
+@_new_chunk     = -> [ [], '', [], ]
+
 
 #===========================================================================================================
 # SLICING
 #-----------------------------------------------------------------------------------------------------------
-@slice = ( me, start, stop ) ->
-  ### `i` for input ###
-  [ i_list_of_open_tags
-    i_texts
-    i_list_of_close_tags  ] = me
+@slice = ( me, start = 0, stop = null ) ->
+  stop              ?= me.length
+  start              = Math.max start, 0
+  stop               = Math.min stop,  me.length
   #.........................................................................................................
-  ### `o` for output ###
-  [ o_list_of_open_tags
-    o_texts
-    o_list_of_close_tags  ] = R = @_new_hotml()
+  return [] if start >= stop
+  R                 = CND.LODASH.cloneDeep me
+  return R if start is 0 and stop is me.length
   #.........................................................................................................
-  return R if start >= stop
-  #.........................................................................................................
-  start                     = Math.max start, 0
-  stop                      = Math.min stop,  i_texts.length - 1
-  o_open_tag_count          = 0
-  tag_stack                 = []
-  initial_open_tags         = []
-  initial_close_tags        = []
-  o_list_of_open_tags.push initial_open_tags
-  o_texts.push ''
-  o_list_of_close_tags.push initial_close_tags
+  R                 = R.slice start, stop
+  open_tag_count    = 0
+  first_open_tags   = R[ 0            ][ 0 ]
+  last_close_tags   = R[ R.length - 1 ][ 2 ]
+  tag_stack         = []
   #.........................................................................................................
   ### Walking backwards from `start` to the beginning, collecting closing and opening tags: ###
   for main_idx in [ start - 1 .. 0 ] by -1
-    i_open_tags       = i_list_of_open_tags[ main_idx ]
-    i_close_tags      = i_list_of_close_tags[ main_idx ]
-    o_open_tag_count -= i_close_tags.length
+    [ open_tags, text, close_tags, ]  = me[ main_idx ]
+    open_tag_count                 -= close_tags.length
     #.......................................................................................................
-    for sub_idx in [ i_open_tags.length - 1 .. 0 ] by -1
-      o_open_tag_count += 1
-      continue unless o_open_tag_count > 0
-      tag_stack.unshift   i_open_tags[ sub_idx ]
-      initial_open_tags.unshift i_open_tags[ sub_idx ]
-  #.........................................................................................................
-  ### Walking forward through the slice: ###
-  for main_idx in [ start ... stop ] by +1
-    i_open_tags       = i_list_of_open_tags[ main_idx ]
-    i_close_tags      = i_list_of_close_tags[ main_idx ]
-    o_close_tags      = []
-    o_open_tag_count += i_open_tags.length
-    o_open_tag_count -= i_close_tags.length
-    tag_stack.push i_open_tag for i_open_tag in i_open_tags
-    if main_idx is start
-      initial_open_tags.push.apply initial_open_tags, i_open_tags
-      o_texts[ 0 ] = i_texts[ main_idx ]
-      initial_close_tags.push.apply initial_close_tags, i_close_tags
-    else
-      o_list_of_open_tags.push  CND.LODASH.clone i_open_tags
-      o_texts.push              i_texts[ main_idx ]
-      o_list_of_close_tags.push CND.LODASH.clone i_close_tags
-    tag_stack.pop() for i_close_tag in i_close_tags
+    for sub_idx in [ open_tags.length - 1 .. 0 ] by -1
+      open_tag_count += 1
+      continue unless open_tag_count > 0
+      first_open_tags.unshift open_tags[ sub_idx ]
   #.........................................................................................................
   ### Closing all remaining open tags: ###
-  if tag_stack.length > 0
-    target = CND.last_of o_list_of_close_tags
-    for idx in [ tag_stack.length - 1 .. 0 ]
-      target.push @render_as_close_tag tag_stack[ idx ]
+  for [ open_tags, text, close_tags, ] in R
+    tag_stack.push open_tag for open_tag in open_tags
+    tag_stack.pop() for close_tag in close_tags
+  # debug '©9Gwy3', tag_stack
+  for idx in [ tag_stack.length - 1 .. 0 ] by -1
+    last_close_tags.push @render_as_close_tag tag_stack[ idx ]
   #.........................................................................................................
   return R
 
@@ -206,12 +154,12 @@ $                         = D.remit.bind D
   input
     .pipe D.HTML.$parse()
     .pipe D.HTML.$collect_texts()
+    .pipe D.HTML.$disperse_texts settings[ 'hyphenation' ] ? null
+    # .pipe D.$show()
     #.......................................................................................................
     .pipe do =>
-      [ open_tags
-        texts
-        close_tags ]  = Z = @_new_hotml()
-      last_type       = null
+      Z         = @_new_hotml()
+      last_type = null
       #.....................................................................................................
       return $ ( event, send ) =>
         _send = send
@@ -219,40 +167,18 @@ $                         = D.remit.bind D
         #...................................................................................................
         switch type
           #.................................................................................................
-          when 'lone-tag'
-            tag = @render_open_tag tail...
+          when 'text', 'lone-tag'
+            if type is 'text' then  text = tail[ 0 ]
+            else                    text = @render_open_tag tail...
+            # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
             switch last_type
               #.............................................................................................
               when null, 'close-tag', 'lone-tag', 'text'
-                open_tags.push []
-                texts.push tag
-                close_tags.push []
+                Z.push chunk  = @_new_chunk()
+                chunk[ 1 ]    = text
               #.............................................................................................
               when 'open-tag'
-                texts[ texts.length - 1 ] = tag
-              #.............................................................................................
-              else
-                return handler new Error "1 ignored event of type #{rpr type}"
-          #.................................................................................................
-          when 'text'
-            text_parts  = D.break_lines hyphenate tail[ 0 ]
-            debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
-            switch last_type
-              #.............................................................................................
-              when null, 'close-tag', 'lone-tag', 'text'
-                for text_part in text_parts
-                  open_tags.push []
-                  texts.push text_part
-                  close_tags.push []
-              #.............................................................................................
-              when 'open-tag'
-                for text_part, idx in text_parts
-                  if idx is 0
-                    texts[ texts.length - 1 ] = text_part
-                  else
-                    open_tags.push []
-                    texts.push text_part
-                    close_tags.push []
+                ( CND.last_of Z )[ 1 ] = text
               #.............................................................................................
               else
                 return handler new Error "1 ignored event of type #{rpr type}"
@@ -260,13 +186,12 @@ $                         = D.remit.bind D
           when 'open-tag'
             switch last_type
               #.............................................................................................
-              when null, 'text', 'lone-tag', 'close-tag'
-                open_tags.push [ @render_open_tag tail..., ]
-                texts.push ''
-                close_tags.push []
+              when 'text', null, 'lone-tag', 'close-tag'
+                Z.push [ open_tags, ... ] = @_new_chunk()
+                open_tags.push @render_open_tag tail...
               #.............................................................................................
               when 'open-tag'
-                ( CND.last_of open_tags ).push @render_open_tag tail...
+                ( CND.last_of Z )[ 0 ].push @render_open_tag tail...
               #.............................................................................................
               else
                 return handler new Error "2 ignored event of type #{rpr type}"
@@ -278,7 +203,7 @@ $                         = D.remit.bind D
                 throw new Error "encountered illegal HTML"
               #.............................................................................................
               when 'text', 'lone-tag', 'close-tag', 'open-tag'
-                ( CND.last_of close_tags ).push @render_close_tag tail...
+                ( CND.last_of Z )[ 2 ].push @render_close_tag tail...
               #.............................................................................................
               else
                 return handler new Error "3 ignored event of type #{rpr type}"

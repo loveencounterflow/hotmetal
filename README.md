@@ -198,10 +198,10 @@ foo <b> bar <i>baz</i> gnu frob</b>
 ```
 
 we see that it is preceded by a closing tag `</i>` which, as long as the HTML source is grammatically
-correct, means that we can safely ignore the next opening tag; indeed, it turns out to be `<i>`. The
-When we hit upon the `<b>` tag, we have to take it into consideration as it is not closed with our
-scope so far. Therefore, our HTML fragment becomes `<b>gnu</b>` (with the trailing space elided).
-Likewise, our two earlier examples become
+correct, means that we can safely ignore the next opening tag; indeed, the next tag turns out to be `<i>`.
+When we hit upon the `<b>` tag, we have to take it into consideration as there is no other closing tag so
+far. Therefore, our HTML fragment becomes `<b>gnu</b>` (with the trailing space elided). Likewise, our two
+earlier examples become
 
 ```html
 <div id='mydiv'><em><i>illustration</i></em></div>

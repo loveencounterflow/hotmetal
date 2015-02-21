@@ -4,7 +4,7 @@
   "description": "Parse, hyphenate, slice, and render your HTML.",
   "main": "lib/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./build && node lib/tests.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   "dependencies": {
     "cnd": "^0.1.5",
     "coffeenode-teacup": "^0.1.4",
+    "guy-test": "^0.1.12",
     "pipedreams2": "^0.2.11"
   }
 }
