@@ -7,8 +7,8 @@
 		- [Text Partitioning](#text-partitioning)
 		- [HTML Partitioning](#html-partitioning)
 		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
-- [list structure, formatted for readability](#list-structure-formatted-for-readability)
-- [as rendered by `HOTMETAL.rpr()`:](#as-rendered-by-hotmetalrpr)
+	- [Why not Just Use TeX?](#why-not-just-use-tex)
+	- [API](#api)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -241,9 +241,6 @@ HOTMETAL.parse html, ( error, hotml ) ->
   console.log HOTMETAL.rpr      hotml
   console.log HOTMETAL.as_html  hotml
 
-
-
-```coffee
 # list structure, formatted for readability
 
 [ [ [ '<p>', '<b>' ], 'very',              [ '</b>' ], ],
