@@ -166,7 +166,8 @@ Lo ✚<div id='mydiv'><em><i>✚ar★cade ✚&amp; ✚&#x4e00; ✚il★lus★tra
   ✚<b>bro★mance</b>✚ cy★ber★space ✚<span class='foo'></span>✚ nec★es★sar★ily</i></em>✚ com★ple★te★ly.</div>
 ```
 
-Now, since we do not know beforehand anything about font metrics, lines could up anywhere, depending on
+Now, since we do not know beforehand anything about font metrics, lines could end up starting and ending
+just anywhere, depending on
 font faces, font sizes, font styles, borders, image sizes—in other words, we must assume that each potential
 breakpoint may become an actual breakpoint. Thus, for example,
 
@@ -218,9 +219,11 @@ respectively.
 
 ### The HoTMetaL Data Structure
 
-**very** nice *and* also good
+The
 
-`<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">`
+```html
+<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">
+```
 
 ```
 0______ 1________________ 2___
@@ -233,11 +236,11 @@ _______ <img src="x.jpg"> </p>
 ```
 
 ```coffee
-[ [ [ '<p>', '<b>' ], 'very',   [ '</b>' ], ],
-  [ [],               ' nice ', [],         ],
-  [ [ '<i>' ],        'and',    [ '</i>' ], ],
-  [ [],               ' also ', [],         ],
-  [ [],               'good ',  [],         ],
+[ [ [ '<p>', '<b>' ], 'very',              [ '</b>' ], ],
+  [ [],               ' nice ',            [],         ],
+  [ [ '<i>' ],        'and',               [ '</i>' ], ],
+  [ [],               ' also ',            [],         ],
+  [ [],               'good ',             [],         ],
   [ [],               '<img src="x.jpg">', [ '</p>' ] ] ]
 ```
 
