@@ -6,6 +6,7 @@
 	- [The Solution](#the-solution)
 		- [Text Partitioning](#text-partitioning)
 		- [HTML Partitioning](#html-partitioning)
+		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
 	- [Why not Just Use TeX?](#why-not-just-use-tex)
 	- [API](#api)
 
@@ -214,6 +215,10 @@ and
 ```
 
 respectively.
+
+### The HoTMetaL Data Structure
+
+![](https://github.com/loveencounterflow/hotmetal/raw/master/art/hotmetal.png)
 
 ## Why not Just Use TeX?
 
