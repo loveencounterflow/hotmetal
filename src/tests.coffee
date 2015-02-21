@@ -94,8 +94,8 @@ handle = ( handler ) ->
   <b>bromance</b> cyberspace <span class="foo"></span> necessarily</i></em> completely.</div>"""
   H.parse html, handle ( hotml ) ->
     # help '©i31d2', H.as_html hotml
-    T.eq hotml, [[[],"Lo ",[]],[["<div id=\"mydiv\">","<em>","<i>"],"ar­",[]],[[],"cade ",[]],[[],"& ",[]],[[],"一 ",[]],[[],"il­",[]],[[],"lus­",[]],[[],"tra­",[]],[[],"tion ",[]],[[],"<img src=\"x.jpg\">",[]],[[]," ",[]],[["<b>"],"bro­",[]],[[],"mance",["</b>"]],[[]," cy­",[]],[[],"ber­",[]],[[],"space ",[]],[["<span class=\"foo\">"],"",["</span>"]],[[]," nec­",[]],[[],"es­",[]],[[],"sar­",[]],[[],"ily",["</i>","</em>"]],[[]," com­",[]],[[],"pletely.",["</div>"]]]
-    T.eq ( H.as_html hotml ), 'Lo <div id="mydiv"><em><i>arcade & 一 illustration <img src="x.jpg"> <b>bromance</b> cyberspace <span class="foo"></span> necessarily</i></em> completely.</div>'
+    T.eq hotml, [[[],"Lo ",[]],[["<div id=\"mydiv\">","<em>","<i>"],"ar­",[]],[[],"cade ",[]],[[],"&amp; ",[]],[[],"一 ",[]],[[],"il­",[]],[[],"lus­",[]],[[],"tra­",[]],[[],"tion ",[]],[[],"<img src=\"x.jpg\">",[]],[[]," ",[]],[["<b>"],"bro­",[]],[[],"mance",["</b>"]],[[]," cy­",[]],[[],"ber­",[]],[[],"space ",[]],[["<span class=\"foo\">"],"",["</span>"]],[[]," nec­",[]],[[],"es­",[]],[[],"sar­",[]],[[],"ily",["</i>","</em>"]],[[]," com­",[]],[[],"pletely.",["</div>"]]]
+    T.eq ( H.as_html hotml ), 'Lo <div id="mydiv"><em><i>arcade &amp; 一 illustration <img src="x.jpg"> <b>bromance</b> cyberspace <span class="foo"></span> necessarily</i></em> completely.</div>'
     done()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -144,9 +144,10 @@ handle = ( handler ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "`H.slice` keeps opening tags from hotml that precedes slice" ] = ( T, done ) ->
-  html  = """<p>foo <img src="x.jpg"> <b>bar awesome</b> baz</p>"""
+  html  = """<p>foo <img src="x.jpg"> <b>bar awesome</b> hotmetal</p>"""
   match = """<p><img src="x.jpg"></p>"""
   H.parse html, handle ( hotml ) ->
+    debug '©jLuh7', hotml
     slice = H.slice hotml, 1, 2
     T.eq ( H.as_html slice ), match
     done()
@@ -193,17 +194,22 @@ handle = ( handler ) ->
       T.eq ( H.as_html slice ), match
     done()
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "Slicing 6" ] = ( T, done ) ->
-#   html = """<p>foo <img src="x.jpg"> <b>bar awesome</b> baz</p>"""
-#   H.parse html, handle ( hotml ) ->
-#     slice = H.slice hotml, 0, me.length
-#     # help '©i31d2', H.rpr slice
-#     # # help '©i31d2', JSON.stringify slice
-#     # help '©i31d2', H.as_html slice
-#     T.eq slice, hotml
-#     # T.eq ( H.as_html slice ), 'Lo <div id="mydiv"><em><i>arcade & 一 illustration <img src="x.jpg"> <b>bromance</b> cyberspace <span class="foo"></span> necessarily</i></em> completely.</div>'
-#     done()
+#-----------------------------------------------------------------------------------------------------------
+@[ "Special characters 1" ] = ( T, done ) ->
+  html  = """foo <b>foo & < > bar</b> baz"""
+  match = """foo <b>foo &amp; &lt; &gt; bar</b> baz"""
+  H.parse html, handle ( hotml ) ->
+    T.eq match, H.as_html hotml
+    done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Special characters 2" ] = ( T, done ) ->
+  # foo&bar+baz%64
+  html  = """foo <a href="foo&amp;bar+baz%64">baz</a>"""
+  match = """foo <a href="foo&amp;bar+baz%64">baz</a>"""
+  H.parse html, handle ( hotml ) ->
+    T.eq match, H.as_html hotml
+    done()
 
 ############################################################################################################
 # settings = 'timeout': null
