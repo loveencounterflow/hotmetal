@@ -7,7 +7,6 @@
 		- [Text Partitioning](#text-partitioning)
 		- [HTML Partitioning](#html-partitioning)
 		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
-	- [Why not Just Use TeX?](#why-not-just-use-tex)
 	- [API](#api)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -271,13 +270,23 @@ the start and stop indexes from the original list; then, we then walk backwards 
 we encounter on the way, keep a count of the closing tags; whenever we meet with an unmatched openening
 tag, we add it to the openening tags of the first triplet in the result. Then, we walk forward through
 the result triplets, pushing all the openening tags to a stack from which we then pop the closing tags;
-the remaining tags on the stack are those that still have to be closed.
+the remaining tags on the stack are those that still have to be closed:
 
 ![](https://github.com/loveencounterflow/hotmetal/raw/master/art/hotmetal.png)
 
-## Why not Just Use TeX?
 
 ## API
+
+* **$parse()**
+* **as_html()**
+* **parse()**
+* **render_as_close_tag()**
+* **render_close_tag()**
+* **render_empty_tag()**
+* **render_open_tag()**
+* **rpr()**
+* **slice()**
+
 
 ```coffee
 H = require 'hotmetal'
