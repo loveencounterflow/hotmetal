@@ -147,20 +147,23 @@ handle = ( handler ) ->
   html  = """<p>foo <img src="x.jpg"> <b>bar awesome</b> hotmetal</p>"""
   match = """<p><img src="x.jpg"></p>"""
   H.parse html, handle ( hotml ) ->
-    debug '©jLuh7', hotml
+    # debug '©jLuh7', hotml
     slice = H.slice hotml, 1, 2
     T.eq ( H.as_html slice ), match
     done()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "..." ] = ( T, done ) ->
-  html  = """<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">"""
+@[ "H.slice honours closing tags" ] = ( T, done ) ->
+  html  = """<p><b>very</b> nice <i>and</i> also good <img src="x.jpg"></p>"""
+  match = """<p> also good <img src="x.jpg"></p>"""
   H.parse html, handle ( hotml ) ->
-    debug '©jLuh7', hotml
-    debug '©jLuh7', H.as_html hotml
-    debug '©jLuh7', H.rpr hotml
+    slice = H.slice hotml, 3, 6
+    debug '©jLuh7', slice
+    debug '©jLuh7', H.as_html slice
+    urge '©jLuh7', H.rpr hotml
+    debug '©jLuh7', H.rpr slice
     # slice = H.slice hotml, 1, 2
-    # T.eq ( H.as_html slice ), match
+    T.eq ( H.as_html slice ), match
     done()
 
 #-----------------------------------------------------------------------------------------------------------

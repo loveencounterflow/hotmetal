@@ -228,13 +228,13 @@ this HTML:
 
 
 ```html
-<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">
+<p><b>very</b> nice <i>and</i> also good <img src="x.jpg"></p>
 ```
 
 Feeding this source to `HOTMETAL.parse()`, we have three ways to print out the resulting structure:
 
 ```coffee
-html  = """<p><b>very</b> nice <i>and</i> also good <img src="x.jpg">"""
+html  = """<p><b>very</b> nice <i>and</i> also good <img src="x.jpg"></p>"""
 HOTMETAL.parse html, ( error, hotml ) ->
   throw error if error?
   console.log                   hotml
@@ -249,7 +249,12 @@ HOTMETAL.parse html, ( error, hotml ) ->
   [ [],               ' also ',            [],         ],
   [ [],               'good ',             [],         ],
   [ [],               '<img src="x.jpg">', [ '</p>' ] ] ]
+```
 
+`HOTMETAL.rpr()` (short for 'representation') gives a nice overview how the parse method organizes
+the input:
+
+```
 # as rendered by `HOTMETAL.rpr()`:
 0______ 1________________ 2___
 <p>,<b> very_____________ </b>
@@ -259,6 +264,14 @@ _______ also_____________ ____
 _______ good_____________ ____
 _______ <img src="x.jpg"> </p>
 ```
+
+It can be seen that producing HTML from this structure is as easy as concatenating all the texts in the
+lists, and getting a slice of valid HTML is almost as easy: We start by copying the triplets between
+the start and stop indexes from the original list; then, we then walk backwards and, in each triplet
+we encounter on the way, keep a count of the closing tags; whenever we meet with an unmatched openening
+tag, we add it to the openening tags of the first triplet in the result. Then, we walk forward through
+the result triplets, pushing all the openening tags to a stack from which we then pop the closing tags;
+the remaining tags on the stack are those that still have to be closed.
 
 ![](https://github.com/loveencounterflow/hotmetal/raw/master/art/hotmetal.png)
 
