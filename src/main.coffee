@@ -245,7 +245,7 @@ $                         = D.remit.bind D
     is_last     = no
     #.......................................................................................................
     loop
-      stop += 1
+      stop   += 1
       is_last = ( stop > hotml.length ) or ( stop - start is 0 and stop == hotml.length )
       #.....................................................................................................
       if is_last
@@ -260,15 +260,21 @@ $                         = D.remit.bind D
       slice = @as_html @slice hotml, start, stop
       #.....................................................................................................
       unless test_line slice, is_first, is_last
+        #...................................................................................................
         if last_slice?
           set_line last_slice, is_first, is_last if set_line?
           lines.push last_slice
+          start = stop - 1
+          stop  = start
+        #...................................................................................................
         else
           set_line slice, is_first, is_last if set_line?
           lines.push slice
-        is_first    = no
-        slice       = null
-        start       = stop
+          slice = null
+          start = stop
+          stop  = start
+        #...................................................................................................
+        is_first = no
       #.....................................................................................................
       last_slice = slice
 

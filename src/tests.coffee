@@ -229,16 +229,16 @@ handle = ( handler ) ->
 @[ "Line breaking 2" ] = ( T, done ) ->
   #.........................................................................................................
   test_line = ( html ) ->
-    # debug '©Dht0s', rpr html
+    # debug '©Dht0s', ( html.length < 10 ), rpr html
     return html.length < 10
   #.........................................................................................................
   set_line = ( html ) ->
-    help html
+    # help html
   #.........................................................................................................
   html  = """Paragraph internationalization assignment (certainly) relativity."""
-  match = ["Paragraph","terna-","alization","signment","tainly)","ativity."]
+  match = ["Paragraph","interna-","tional-","ization","assign-","ment","(cer-","tainly)","relativ-","ity."]
   H.break_lines html, test_line, set_line, handle ( lines ) =>
-    urge JSON.stringify lines
+    # urge JSON.stringify lines
     T.eq match, lines
     done()
 
