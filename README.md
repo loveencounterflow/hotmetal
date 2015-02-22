@@ -277,15 +277,14 @@ the remaining tags on the stack are those that still have to be closed:
 
 ## API
 
-* **$parse()**
-* **as_html()**
-* **parse()**
-* **render_as_close_tag()**
-* **render_close_tag()**
-* **render_empty_tag()**
-* **render_open_tag()**
-* **rpr()**
-* **slice()**
+* **`H.$parse = ->`** (not yet implemented)
+* **`H.as_html = ( hotml ) ->`**
+* **`H.parse = ( html ) ->`**
+* **`H.rpr = ( hotml ) ->`**
+* **`H.slice = ( hotml, start = 0, stop = null ) ->`**
+* **`H.break_lines`**
+* **`H.$break_lines`**
+* **`H.get_column_linecounts = ( strategy, line_count, column_count )`**
 
 
 ```coffee
