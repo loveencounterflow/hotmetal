@@ -28,15 +28,15 @@ handle = ( handler ) ->
     throw error if error?
     handler result
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "Object creation" ] = ( T, done ) ->
-  T.eq H._new_hotml(), []
-  [ open_tags, test, close_tags, ] = chunk = H._new_chunk()
-  T.eq chunk, [ [], '', [], ]
-  # T.ok ( H._open_tags_of  chunk ) is open_tags
-  # T.ok ( H._text_of       chunk ) is test
-  # T.ok ( H._close_tags_of chunk ) is close_tags
-  done()
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "Object creation" ] = ( T, done ) ->
+#   T.eq H._new_hotml(), []
+#   [ open_tags, test, close_tags, ] = chunk = H._new_chunk()
+#   T.eq chunk, [ [], '', [], ]
+#   # T.ok ( H._open_tags_of  chunk ) is open_tags
+#   # T.ok ( H._text_of       chunk ) is test
+#   # T.ok ( H._close_tags_of chunk ) is close_tags
+#   done()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Parsing 1" ] = ( T, done ) ->
@@ -64,9 +64,10 @@ handle = ( handler ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "Parsing 4" ] = ( T, done ) ->
-  html = """foo <img src="x.jpg"> <b>bar awesome</b> baz"""
+  html  = """foo <img src="x.jpg"> <b>bar awesome</b> baz"""
+  match = [[[],"foo ",[]],[[],"<img src=\"x.jpg\">",[]],[[]," ",[]],[["<b>"],"bar ",[]],[[],"awe­",[]],[[],"some",["</b>"]],[[]," baz",[]]]
   H.parse html, handle ( hotml ) ->
-    T.eq hotml, [[[],"foo ",[]],[[],"<img src=\"x.jpg\">",[]],[[]," ",[]],[["<b>"],"bar ",[]],[[],"awe­",[]],[[],"some",["</b>"]],[[]," baz",[]]]
+    T.eq hotml, match
     T.eq html, H.as_html hotml
     done()
 
@@ -277,7 +278,7 @@ handle = ( handler ) ->
     done()
 
 ############################################################################################################
-# settings = 'timeout': null
-settings = null
+settings = 'timeout': 500
+# settings = null
 test @, settings
 # CND.dir H

@@ -116,6 +116,48 @@ $                         = D.remit.bind D
   #.........................................................................................................
   return R
 
+#-----------------------------------------------------------------------------------------------------------
+@slice_toplevel_tags = ( me, handler = null ) ->
+  ### TAINT make ignorable inter-tag WS configurable? ###
+  open_tag_count        = 0
+  last_open_tag_count   = 0
+  start                 = null
+  stop                  = null
+  R                     = if handler? then null else []
+  #.........................................................................................................
+  for chunk, chunk_idx in me
+    [ open_tags, text, close_tags, ] = chunk
+    #.......................................................................................................
+    if open_tag_count is 0
+      if open_tags.length is 0
+        unless /^\s*$/.test text
+          error = new Error "invalid HoTMetaL structure: detected printing material between toplevel tags"
+          if handler? then return handler error else throw error
+      else
+        start = chunk_idx
+    #.......................................................................................................
+    open_tag_count += open_tags.length
+    open_tag_count -= close_tags.length
+    #.......................................................................................................
+    if open_tag_count is 0
+      if last_open_tag_count isnt 0
+        stop  = chunk_idx + 1
+        slice = @slice me, start, stop
+        if handler? then handler null, slice else R.push slice
+    else if open_tag_count < 0
+      error = new Error "invalid HoTMetaL structure"
+      if handler? then return handler error else throw error
+    #.......................................................................................................
+    last_open_tag_count = open_tag_count
+  #.........................................................................................................
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@$slice_toplevel_tags = ->
+  return $ ( me, send ) =>
+    @slice_toplevel_tags me, ( error, slice ) =>
+      return send.error error if error?
+      send slice
 
 #===========================================================================================================
 # PARSING
@@ -133,11 +175,18 @@ $                         = D.remit.bind D
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$parse = ->
-  throw new Error "not implemented"
+@$parse = ( settings ) ->
+  settings ?= {}
+  return $ ( html, send ) =>
+    @_parse html, settings, ( error, me ) =>
+      return send.error error if error?
+      # debug '©HdNRE', @rpr me
+      send me
 
 #-----------------------------------------------------------------------------------------------------------
 @_parse = ( html, settings, handler = null ) ->
+  ### TAINT try to re-implement more efficiently; avoid to create new stream on each call at least when
+  used as a stream transformer. ###
   input       = D.create_throughstream()
   _send       = null
   #---------------------------------------------------------------------------------------------------------
@@ -153,7 +202,8 @@ $                         = D.remit.bind D
   #---------------------------------------------------------------------------------------------------------
   input
     .pipe D.HTML.$parse()
-    .pipe D.HTML.$collect_texts()
+    # .pipe D.$show()
+    # .pipe D.HTML.$collect_texts()
     .pipe D.HTML.$disperse_texts settings[ 'hyphenation' ] ? null
     # .pipe D.$show()
     #.......................................................................................................
@@ -161,61 +211,62 @@ $                         = D.remit.bind D
       Z         = @_new_hotml()
       last_type = null
       #.....................................................................................................
-      return $ ( event, send ) =>
+      return $ ( event, send, end ) =>
         _send = send
-        [ type, tail..., ] = event
         #...................................................................................................
-        switch type
-          #.................................................................................................
-          when 'text', 'lone-tag'
-            if type is 'text' then  text = tail[ 0 ]
-            else                    text = @_render_open_tag tail...
-            # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
-            switch last_type
-              #.............................................................................................
-              when null, 'close-tag', 'lone-tag', 'text'
-                Z.push chunk  = @_new_chunk()
-                chunk[ 1 ]    = text
-              #.............................................................................................
-              when 'open-tag'
-                ( CND.last_of Z )[ 1 ] = text
-              #.............................................................................................
-              else
-                return handler new Error "1 ignored event of type #{rpr type}"
-          #.................................................................................................
-          when 'open-tag'
-            switch last_type
-              #.............................................................................................
-              when 'text', null, 'lone-tag', 'close-tag'
-                Z.push [ open_tags, ... ] = @_new_chunk()
-                open_tags.push @_render_open_tag tail...
-              #.............................................................................................
-              when 'open-tag'
-                ( CND.last_of Z )[ 0 ].push @_render_open_tag tail...
-              #.............................................................................................
-              else
-                return handler new Error "2 ignored event of type #{rpr type}"
-          #.................................................................................................
-          when 'close-tag'
-            switch last_type
-              #.............................................................................................
-              when null
-                throw new Error "encountered illegal HTML"
-              #.............................................................................................
-              when 'text', 'lone-tag', 'close-tag', 'open-tag'
-                ( CND.last_of Z )[ 2 ].push @_render_close_tag tail...
-              #.............................................................................................
-              else
-                return handler new Error "3 ignored event of type #{rpr type}"
-          #.................................................................................................
-          when 'end'
-            handler null, Z
-          #.................................................................................................
-          else
-            return handler new Error "4 ignored event of type #{rpr type}"
+        if event?
+          [ type, tail..., ] = event
+          #...................................................................................................
+          switch type
+            #.................................................................................................
+            when 'text', 'lone-tag'
+              if type is 'text' then  text = tail[ 0 ]
+              else                    text = @_render_open_tag tail...
+              # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
+              switch last_type
+                #.............................................................................................
+                when null, 'close-tag', 'lone-tag', 'text'
+                  Z.push chunk  = @_new_chunk()
+                  chunk[ 1 ]    = text
+                #.............................................................................................
+                when 'open-tag'
+                  ( CND.last_of Z )[ 1 ] = text
+                #.............................................................................................
+                else
+                  return handler new Error "1 ignored event of type #{rpr type}"
+            #.................................................................................................
+            when 'open-tag'
+              switch last_type
+                #.............................................................................................
+                when 'text', null, 'lone-tag', 'close-tag'
+                  Z.push [ open_tags, ... ] = @_new_chunk()
+                  open_tags.push @_render_open_tag tail...
+                #.............................................................................................
+                when 'open-tag'
+                  ( CND.last_of Z )[ 0 ].push @_render_open_tag tail...
+                #.............................................................................................
+                else
+                  return handler new Error "2 ignored event of type #{rpr type}"
+            #.................................................................................................
+            when 'close-tag'
+              switch last_type
+                #.............................................................................................
+                when null
+                  throw new Error "encountered illegal HTML"
+                #.............................................................................................
+                when 'text', 'lone-tag', 'close-tag', 'open-tag'
+                  ( CND.last_of Z )[ 2 ].push @_render_close_tag tail...
+                #.............................................................................................
+                else
+                  return handler new Error "3 ignored event of type #{rpr type}"
+            #.................................................................................................
+            else
+              return handler new Error "4 ignored event of type #{rpr type}"
+          #...................................................................................................
+          last_type = type
         #...................................................................................................
-        last_type = type
-        send Z
+        if end?
+          handler null, Z
   #---------------------------------------------------------------------------------------------------------
   input.write html
   input.end()

@@ -102,6 +102,9 @@ Fortunately, there has been done quite some work in the field of language proces
 [JavaScript as a NodeJS module called `linebreak`](https://github.com/devongovett/linebreak) and may be
 installed as easy as `npm install linebreak`.
 
+> There's yet another implementation of UAX avalaible which goes by the unassuming name of [Unicode
+> Tokenizer](https://github.com/bramstein/unicode-tokenizer).
+
 Second, there is [a hyphenation module, `hypher`](https://github.com/bramstein/Hypher), with [quite a few
 language-specific hyphenation patterns](https://www.npmjs.com/search?q=hyphenation) available.
 
@@ -299,7 +302,7 @@ Given an HTML source, an optional `settings` object and a callback `handler`, pr
 (a nested list; henceforth referred to as `hotml`).
 
 Currectly, a single setting, `settings[ 'hyphenation' ]`, is honored; this value is used as argument
-to `[PIPEDREAMS](https://github.com/loveencounterflow/pipedreams2).new_hyphenate()`
+to `[PIPEDREAMS](https://github.com/loveencounterflow/pipedreams2#new_hyphenate).new_hyphenate()`.
 
 #### `$parse`
 
@@ -333,7 +336,7 @@ Otherwise, `start` and `stop` are both confined to range `[ 0 .. hotml.length ]`
 
 #### `get_column_linecounts`
 
-`H.get_column_linecounts = ( strategy, line_count, column_count )`
+`H.get_column_linecounts = ( strategy, line_count, column_count ) ->`
 
 
 ### Rendering
