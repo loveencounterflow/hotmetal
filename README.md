@@ -265,10 +265,10 @@ _______ <img src="x.jpg"> </p>
 ```
 
 It can be seen that producing HTML from this structure is as easy as concatenating all the texts in the
-lists, and getting a slice of valid HTML is almost as easy: We start by copying the triplets between
+lists, and getting a slice of valid HTML is almost as easy: We start by Ⓐ copying the triplets between
 the start and stop indexes from the original list; then, we then walk backwards and, in each triplet
 we encounter on the way, keep a count of the closing tags; whenever we meet with an unmatched openening
-tag, we add it to the openening tags of the first triplet in the result. Then, we walk forward through
+tag, we add it to the openening tags of the first triplet in the result. Then, we Ⓑ walk forward through
 the result triplets, pushing all the openening tags to a stack from which we then pop the closing tags;
 the remaining tags on the stack are those that still have to be closed:
 
