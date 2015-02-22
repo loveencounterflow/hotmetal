@@ -83,8 +83,8 @@ $                         = D.remit.bind D
 #-----------------------------------------------------------------------------------------------------------
 @slice = ( me, start = 0, stop = null ) ->
   stop              ?= me.length
-  start              = Math.max start, 0
-  stop               = Math.min stop,  me.length
+  start              = Math.max 0, Math.min me.length, start
+  stop               = Math.max 0, Math.min me.length, stop
   #.........................................................................................................
   return [] if start >= stop
   R                 = CND.LODASH.cloneDeep me

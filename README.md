@@ -9,16 +9,17 @@
 		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
 	- [API](#api)
 		- [Parsing](#parsing)
-			- [`H.parse = ( html ) ->`](#hparse-=--html--->)
-			- [`H.$parse = ->`](#h$parse-=-->)
+			- [`parse`](#parse)
+			- [`$parse`](#$parse)
 		- [Modifying](#modifying)
-			- [`H.slice = ( hotml, start = 0, stop = null ) ->`](#hslice-=--hotml-start-=-0-stop-=-null--->)
-			- [`H.break_lines`](#hbreak_lines)
-			- [`H.$break_lines`](#h$break_lines)
-			- [`H.get_column_linecounts = ( strategy, line_count, column_count )`](#hget_column_linecounts-=--strategy-line_count-column_count-)
+			- [`slice`](#slice)
+		- [Typesetting](#typesetting)
+			- [`break_lines`](#break_lines)
+			- [`$break_lines`](#$break_lines)
+			- [`get_column_linecounts`](#get_column_linecounts)
 		- [Rendering](#rendering)
-			- [`H.as_html = ( hotml ) ->`](#has_html-=--hotml--->)
-			- [`H.rpr = ( hotml ) ->`](#hrpr-=--hotml--->)
+			- [`as_html`](#as_html)
+			- [`rpr`](#rpr)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -290,21 +291,64 @@ the remaining tags on the stack are those that still have to be closed:
 
 ### Parsing
 
-#### `H.parse = ( html ) ->`
+#### `parse`
 
-#### `H.$parse = ->`
+`H.parse = ( html, settings, handler ) ->`
+
+Given an HTML source, an optional `settings` object and a callback `handler`, produce a HoTMetaL object
+(a nested list; henceforth referred to as `hotml`).
+
+Currectly, a single setting, `settings[ 'hyphenation' ]`, is honored; this value is used as argument
+to `[PIPEDREAMS](https://github.com/loveencounterflow/pipedreams2).new_hyphenate()`
+
+#### `$parse`
+
+`H.$parse = ->`
   (not yet implemented)
 
 ### Modifying
 
-#### `H.slice = ( hotml, start = 0, stop = null ) ->`
-#### `H.break_lines`
-#### `H.$break_lines`
-#### `H.get_column_linecounts = ( strategy, line_count, column_count )`
+#### `slice`
+
+`H.slice = ( hotml, start = 0, stop = null ) ->`
+
+Return a slice of the `hotml` list. The method with its `start` and `stop` arguments mimicks the behavior of
+the `Array::slice()` method. When both `start` and `stop` are given, the slice between index `start`
+(inclusively) and `stop` (exclusively) will be returned; the slice will always be derived from a deep copy
+of `hotml`, so modifying sublists in the slice will not affect the original list.
+
+Special cases are treated as follows: With `start` and `stop` omitted, a deep copy of `hotml` is returned.
+Otherwise, `start` and `stop` are both confined to range `[ 0 .. hotml.length ]`.  When `start` and
+`stop` coincide or `stop` is less than `start`, an empty list is returned.
+
+### Typesetting
+
+#### `break_lines`
+
+`H.break_lines = ( html, test_line, set_line, handler ) ->`
+
+#### `$break_lines`
+
+`H.$break_lines = ( test_line ) ->``
+
+#### `get_column_linecounts`
+
+`H.get_column_linecounts = ( strategy, line_count, column_count )`
+
 
 ### Rendering
-#### `H.as_html = ( hotml ) ->`
-#### `H.rpr = ( hotml ) ->`
+
+#### `as_html`
+
+`H.as_html = ( hotml ) ->`
+
+Return the `hotml` object as an HTML string.
+
+#### `rpr`
+
+`H.rpr = ( hotml ) ->`
+
+Return the `hotml` object as an ASCII-art table for display in the terminal.
 
 
 ```coffee
