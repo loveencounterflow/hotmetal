@@ -145,7 +145,7 @@ $                         = D.remit.bind D
     hyphenate   = ( text ) => text
   else
     hyphenation = if settings[ 'hyphenation' ] is true then null else settings[ 'hyphenation' ]
-    hyphenate   = D.new_hyphenator hyphenation
+    hyphenate   = D.new_hyphenate hyphenation
   #---------------------------------------------------------------------------------------------------------
   handler ?= ( error, hotml ) =>
     return _send.error error if error
@@ -236,47 +236,53 @@ $                         = D.remit.bind D
   #---------------------------------------------------------------------------------------------------------
   @.parse html, ( error, hotml ) =>
     return handler error if error?
-    start       = 0
-    stop        = start
-    last_slice  = null
-    lines       = []
-    slice       = null
-    is_first    = yes
-    is_last     = no
+    start             = 0
+    stop              = start
+    last_slice        = null
+    last_slice_hotml  = null
+    lines             = []
+    slice             = null
+    is_first_line     = yes
+    is_last_line      = no
+    is_first_try      = yes
     #.......................................................................................................
     loop
       stop   += 1
-      is_last = ( stop > hotml.length ) or ( stop - start is 0 and stop == hotml.length )
+      is_last_line = ( stop > hotml.length ) or ( stop - start is 0 and stop == hotml.length )
       #.....................................................................................................
-      if is_last
+      if is_last_line
         if last_slice?
-          set_line last_slice, is_first, is_last if set_line?
+          set_line last_slice, is_first_line, is_last_line, last_slice_hotml if set_line?
           lines.push last_slice
         else if slice?
-          set_line slice, is_first, is_last if set_line?
+          set_line slice, is_first_line, is_last_line, slice_hotml if set_line?
           lines.push slice
         return handler null, lines
       #.....................................................................................................
-      slice = @as_html @slice hotml, start, stop
+      slice_hotml = @slice hotml, start, stop
+      slice       = @as_html slice_hotml
+      fits        = test_line slice, is_first_line, is_last_line, slice_hotml
       #.....................................................................................................
-      unless test_line slice, is_first, is_last
+      if fits
+        last_slice        = slice
+        last_slice_hotml  = slice_hotml
+      else
         #...................................................................................................
         if last_slice?
-          set_line last_slice, is_first, is_last if set_line?
+          set_line last_slice, is_first_line, is_last_line, last_slice_hotml if set_line?
           lines.push last_slice
-          start = stop - 1
-          stop  = start
+          last_slice  = null
+          start       = stop - 1
+          stop        = start
         #...................................................................................................
         else
-          set_line slice, is_first, is_last if set_line?
+          set_line slice, is_first_line, is_last_line, slice_hotml if set_line?
           lines.push slice
           slice = null
           start = stop
           stop  = start
         #...................................................................................................
-        is_first = no
-      #.....................................................................................................
-      last_slice = slice
+        is_first_line = no
 
 #-----------------------------------------------------------------------------------------------------------
 @$break_lines = ( test_line ) ->
