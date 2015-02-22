@@ -8,14 +8,17 @@
 		- [HTML Partitioning](#html-partitioning)
 		- [The HoTMetaL Data Structure](#the-hotmetal-data-structure)
 	- [API](#api)
-		- [**`H.$parse = ->`** (not yet implemented)](#h$parse-=-->-not-yet-implemented)
-		- [**`H.as_html = ( hotml ) ->`**](#has_html-=--hotml--->)
-		- [**`H.parse = ( html ) ->`**](#hparse-=--html--->)
-		- [**`H.rpr = ( hotml ) ->`**](#hrpr-=--hotml--->)
-		- [**`H.slice = ( hotml, start = 0, stop = null ) ->`**](#hslice-=--hotml-start-=-0-stop-=-null--->)
-		- [**`H.break_lines`**](#hbreak_lines)
-		- [**`H.$break_lines`**](#h$break_lines)
-		- [**`H.get_column_linecounts = ( strategy, line_count, column_count )`**](#hget_column_linecounts-=--strategy-line_count-column_count-)
+		- [Parsing](#parsing)
+			- [**`H.parse = ( html ) ->`**](#hparse-=--html--->)
+			- [**`H.$parse = ->`**](#h$parse-=-->)
+		- [Modifying](#modifying)
+			- [**`H.slice = ( hotml, start = 0, stop = null ) ->`**](#hslice-=--hotml-start-=-0-stop-=-null--->)
+			- [**`H.break_lines`**](#hbreak_lines)
+			- [**`H.$break_lines`**](#h$break_lines)
+			- [**`H.get_column_linecounts = ( strategy, line_count, column_count )`**](#hget_column_linecounts-=--strategy-line_count-column_count-)
+		- [Rendering](#rendering)
+			- [**`H.as_html = ( hotml ) ->`**](#has_html-=--hotml--->)
+			- [**`H.rpr = ( hotml ) ->`**](#hrpr-=--hotml--->)
 
 > **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
@@ -285,14 +288,23 @@ the remaining tags on the stack are those that still have to be closed:
 
 ## API
 
-### **`H.$parse = ->`** (not yet implemented)
-### **`H.as_html = ( hotml ) ->`**
-### **`H.parse = ( html ) ->`**
-### **`H.rpr = ( hotml ) ->`**
-### **`H.slice = ( hotml, start = 0, stop = null ) ->`**
-### **`H.break_lines`**
-### **`H.$break_lines`**
-### **`H.get_column_linecounts = ( strategy, line_count, column_count )`**
+### Parsing
+
+#### **`H.parse = ( html ) ->`**
+
+#### **`H.$parse = ->`**
+  (not yet implemented)
+
+### Modifying
+
+#### **`H.slice = ( hotml, start = 0, stop = null ) ->`**
+#### **`H.break_lines`**
+#### **`H.$break_lines`**
+#### **`H.get_column_linecounts = ( strategy, line_count, column_count )`**
+
+### Rendering
+#### **`H.as_html = ( hotml ) ->`**
+#### **`H.rpr = ( hotml ) ->`**
 
 
 ```coffee

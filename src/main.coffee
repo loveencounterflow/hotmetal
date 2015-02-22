@@ -55,19 +55,19 @@ $                         = D.remit.bind D
 #===========================================================================================================
 # TAG RENDERING
 #-----------------------------------------------------------------------------------------------------------
-@render_open_tag = ( name, attributes ) ->
-  return ( @render_empty_tag name, attributes ).replace /<\/[^>]+>$/, ''
+@_render_open_tag = ( name, attributes ) ->
+  return ( @_render_empty_tag name, attributes ).replace /<\/[^>]+>$/, ''
 
 #-----------------------------------------------------------------------------------------------------------
-@render_close_tag = ( name ) ->
+@_render_close_tag = ( name ) ->
   return "</#{name}>"
 
 #-----------------------------------------------------------------------------------------------------------
-@render_as_close_tag = ( open_tag ) ->
-  return @render_close_tag open_tag.replace /^<([^\s>]+).*$/, '$1'
+@_render_as_close_tag = ( open_tag ) ->
+  return @_render_close_tag open_tag.replace /^<([^\s>]+).*$/, '$1'
 
 #-----------------------------------------------------------------------------------------------------------
-@render_empty_tag = ( name, attributes ) ->
+@_render_empty_tag = ( name, attributes ) ->
   return TEACUP.render => TEACUP.TAG name, attributes
 
 
@@ -112,7 +112,7 @@ $                         = D.remit.bind D
     tag_stack.pop() for close_tag in close_tags
   # debug '©9Gwy3', tag_stack
   for idx in [ tag_stack.length - 1 .. 0 ] by -1
-    last_close_tags.push @render_as_close_tag tag_stack[ idx ]
+    last_close_tags.push @_render_as_close_tag tag_stack[ idx ]
   #.........................................................................................................
   return R
 
@@ -133,7 +133,7 @@ $                         = D.remit.bind D
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$parse = ( html ) ->
+@$parse = ->
   throw new Error "not implemented"
 
 #-----------------------------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ $                         = D.remit.bind D
           #.................................................................................................
           when 'text', 'lone-tag'
             if type is 'text' then  text = tail[ 0 ]
-            else                    text = @render_open_tag tail...
+            else                    text = @_render_open_tag tail...
             # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
             switch last_type
               #.............................................................................................
@@ -188,10 +188,10 @@ $                         = D.remit.bind D
               #.............................................................................................
               when 'text', null, 'lone-tag', 'close-tag'
                 Z.push [ open_tags, ... ] = @_new_chunk()
-                open_tags.push @render_open_tag tail...
+                open_tags.push @_render_open_tag tail...
               #.............................................................................................
               when 'open-tag'
-                ( CND.last_of Z )[ 0 ].push @render_open_tag tail...
+                ( CND.last_of Z )[ 0 ].push @_render_open_tag tail...
               #.............................................................................................
               else
                 return handler new Error "2 ignored event of type #{rpr type}"
@@ -203,7 +203,7 @@ $                         = D.remit.bind D
                 throw new Error "encountered illegal HTML"
               #.............................................................................................
               when 'text', 'lone-tag', 'close-tag', 'open-tag'
-                ( CND.last_of Z )[ 2 ].push @render_close_tag tail...
+                ( CND.last_of Z )[ 2 ].push @_render_close_tag tail...
               #.............................................................................................
               else
                 return handler new Error "3 ignored event of type #{rpr type}"
