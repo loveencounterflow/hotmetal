@@ -158,10 +158,10 @@ handle = ( handler ) ->
   match = """<p> also good <img src="x.jpg"></p>"""
   H.parse html, handle ( hotml ) ->
     slice = H.slice hotml, 3, 6
-    debug '©jLuh7', slice
-    debug '©jLuh7', H.as_html slice
-    urge '©jLuh7', H.rpr hotml
-    debug '©jLuh7', H.rpr slice
+    # debug '©jLuh7', slice
+    # debug '©jLuh7', H.as_html slice
+    # urge '©jLuh7', H.rpr hotml
+    # debug '©jLuh7', H.rpr slice
     # slice = H.slice hotml, 1, 2
     T.eq ( H.as_html slice ), match
     done()
@@ -223,6 +223,23 @@ handle = ( handler ) ->
   match = """foo <a href="foo&amp;bar+baz%64">baz</a>"""
   H.parse html, handle ( hotml ) ->
     T.eq match, H.as_html hotml
+    done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Line breaking 2" ] = ( T, done ) ->
+  #.........................................................................................................
+  test_line = ( html ) ->
+    # debug '©Dht0s', rpr html
+    return html.length < 10
+  #.........................................................................................................
+  set_line = ( html ) ->
+    help html
+  #.........................................................................................................
+  html  = """Paragraph internationalization assignment (certainly) relativity."""
+  match = ["Paragraph","terna-","alization","signment","tainly)","ativity."]
+  H.break_lines html, test_line, set_line, handle ( lines ) =>
+    urge JSON.stringify lines
+    T.eq match, lines
     done()
 
 ############################################################################################################

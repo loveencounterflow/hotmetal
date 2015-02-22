@@ -222,6 +222,64 @@ $                         = D.remit.bind D
 
 
 #===========================================================================================================
+# LINE BREAKING
+#-----------------------------------------------------------------------------------------------------------
+@break_lines = ( html, test_line, set_line, handler ) ->
+  switch arity = arguments.length
+    when 3
+      handler   = set_line
+      set_line  = null
+    when 4
+      null
+    else
+      throw new Error "expected 3 or 4 arguments, got #{arity}"
+  #---------------------------------------------------------------------------------------------------------
+  @.parse html, ( error, hotml ) =>
+    return handler error if error?
+    start       = 0
+    stop        = start
+    last_slice  = null
+    lines       = []
+    slice       = null
+    is_first    = yes
+    is_last     = no
+    #.......................................................................................................
+    loop
+      stop += 1
+      is_last = ( stop > hotml.length ) or ( stop - start is 0 and stop == hotml.length )
+      #.....................................................................................................
+      if is_last
+        if last_slice?
+          set_line last_slice, is_first, is_last if set_line?
+          lines.push last_slice
+        else if slice?
+          set_line slice, is_first, is_last if set_line?
+          lines.push slice
+        return handler null, lines
+      #.....................................................................................................
+      slice = @as_html @slice hotml, start, stop
+      #.....................................................................................................
+      unless test_line slice, is_first, is_last
+        if last_slice?
+          set_line last_slice, is_first, is_last if set_line?
+          lines.push last_slice
+        else
+          set_line slice, is_first, is_last if set_line?
+          lines.push slice
+        is_first    = no
+        slice       = null
+        start       = stop
+      #.....................................................................................................
+      last_slice = slice
+
+#-----------------------------------------------------------------------------------------------------------
+@$break_lines = ( test_line ) ->
+  return $ ( html, send ) =>
+    @break_lines html, test_line, null, ( error, lines ) =>
+      send lines
+
+
+#===========================================================================================================
 # DEMO
 #-----------------------------------------------------------------------------------------------------------
 @demo = ->
