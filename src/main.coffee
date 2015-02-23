@@ -192,8 +192,7 @@ TEACUP                    = require 'coffeenode-teacup'
   ### TAINT use library method ###
   name_from_tag   = ( tag ) -> tag.replace /^<\/?([^\s>]+).*$/, '$1'
   #.........................................................................................................
-  for chunk, chunk_idx in me
-    [ open_tags, text, close_tags, ]  = chunk
+  for [ open_tags, text, close_tags, ], chunk_idx in me
     return false if chunk_idx is 0 and open_tags.length is 0
     is_last_chunk                     = chunk_idx is last_chunk_idx
     last_tag_idx                      = close_tags.length - 1
@@ -218,6 +217,7 @@ TEACUP                    = require 'coffeenode-teacup'
     throw new Error "HTML does not form a wrapped structure"
   return me
 
+
 #===========================================================================================================
 # LINE BREAKING
 #-----------------------------------------------------------------------------------------------------------
@@ -236,7 +236,6 @@ TEACUP                    = require 'coffeenode-teacup'
   start             = 0
   stop              = start
   last_slice        = null
-  lines             = []
   slice             = null
   is_first_line     = yes
   is_last_line      = no
@@ -249,11 +248,9 @@ TEACUP                    = require 'coffeenode-teacup'
     if is_last_line
       if last_slice?
         set_line last_slice, is_first_line, is_last_line if set_line?
-        lines.push last_slice
       else if slice?
         set_line slice, is_first_line, is_last_line if set_line?
-        lines.push slice
-      return lines
+      return null
     #.....................................................................................................
     slice = @slice me, start, stop
     fits  = test_line slice, is_first_line, is_last_line
@@ -264,14 +261,12 @@ TEACUP                    = require 'coffeenode-teacup'
       #...................................................................................................
       if last_slice?
         set_line last_slice, is_first_line, is_last_line if set_line?
-        lines.push last_slice
         last_slice  = null
         start       = stop - 1
         stop        = start
       #...................................................................................................
       else
         set_line slice, is_first_line, is_last_line if set_line?
-        lines.push slice
         slice = null
         start = stop
         stop  = start
