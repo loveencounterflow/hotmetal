@@ -15,8 +15,8 @@ urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
 TEACUP                    = require 'coffeenode-teacup'
-D                         = require 'pipedreams2'
-$                         = D.remit.bind D
+# D                         = require 'pipedreams2'
+# $                         = D.remit.bind D
 
 #===========================================================================================================
 # HELPERS
@@ -43,12 +43,7 @@ $                         = D.remit.bind D
   R = text
   R = R.replace /\xad$/,    if is_last then '-' else ''
   R = R.replace /\s+$/, ''  if is_last
-  ### TAINT must escape HTML special chrs ###
-  # R               = R.replace /&/g, '&amp;'
-  # R               = R.replace /</g, '&lt;'
-  # R               = R.replace />/g, '&gt;'
   #.........................................................................................................
-  # R[ first_idx ] = R[ first_idx ].replace /^\s+/ if R[ first_idx ]?
   return R
 
 
@@ -72,10 +67,48 @@ $                         = D.remit.bind D
 
 
 #===========================================================================================================
-# POD CREATION
+# OBJECT CREATION
 #-----------------------------------------------------------------------------------------------------------
 @_new_hotml     = -> []
 @_new_chunk     = -> [ [], '', [], ]
+
+
+#===========================================================================================================
+# OBJECT BUILDING
+#-----------------------------------------------------------------------------------------------------------
+@add = ( me, type, tail... ) ->
+  ### TAINT ??? won't work correctly with empty tags because we check for `text.length == 0` ??? ###
+  me.push @_new_chunk() if me.length is 0
+  target  = CND.last_of me
+  #.........................................................................................................
+  switch type
+    when 'open-tag', 'lone-tag', 'text'
+      if target[ 1 ].length > 0 or target[ 2 ].length > 0
+        me.push target = @_new_chunk()
+    else
+      null
+  #.........................................................................................................
+  switch type
+    #.......................................................................................................
+    when 'open-tag'
+      target[ 0 ].push @_render_open_tag tail...
+    #.......................................................................................................
+    when 'lone-tag'
+      target[ 1 ] = @_render_open_tag tail...
+    #.......................................................................................................
+    when 'lone-tag', 'text'
+      target[ 1 ] = tail[ 0 ]
+    #.......................................................................................................
+    when 'close-tag'
+      target[ 2 ].push @_render_close_tag tail[ 0 ]
+    #.......................................................................................................
+    when 'comment', 'doctype'
+      null
+    #.......................................................................................................
+    else
+      throw new Error "unknown type #{rpr type}"
+  #.........................................................................................................
+  return me
 
 
 #===========================================================================================================
@@ -153,193 +186,100 @@ $                         = D.remit.bind D
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@$slice_toplevel_tags = ->
-  return $ ( me, send ) =>
-    @slice_toplevel_tags me, ( error, slice ) =>
-      return send.error error if error?
-      send slice
-
-#===========================================================================================================
-# PARSING
-#-----------------------------------------------------------------------------------------------------------
-@parse = ( html, settings, handler ) ->
-  switch arity = arguments.length
-    when 2
-      handler   = settings
-      settings  = {}
-    when 3
-      null
-    else throw new Error "expected 2 or 3 arguments, got #{arity}"
-  CND.validate_isa_function handler
-  @_parse html, settings, handler
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@$parse = ( settings ) ->
-  settings ?= {}
-  return $ ( html, send ) =>
-    @_parse html, settings, ( error, me ) =>
-      return send.error error if error?
-      # debug '©HdNRE', @rpr me
-      send me
-
-#-----------------------------------------------------------------------------------------------------------
-@_parse = ( html, settings, handler = null ) ->
-  ### TAINT try to re-implement more efficiently; avoid to create new stream on each call at least when
-  used as a stream transformer. ###
-  input       = D.create_throughstream()
-  _send       = null
-  #---------------------------------------------------------------------------------------------------------
-  if settings[ 'hyphenation' ] is false
-    hyphenate   = ( text ) => text
-  else
-    hyphenation = if settings[ 'hyphenation' ] is true then null else settings[ 'hyphenation' ]
-    hyphenate   = D.new_hyphenate hyphenation
-  #---------------------------------------------------------------------------------------------------------
-  handler ?= ( error, hotml ) =>
-    return _send.error error if error
-    _send hotml
-  #---------------------------------------------------------------------------------------------------------
-  input
-    .pipe D.HTML.$parse()
-    # .pipe D.$show()
-    # .pipe D.HTML.$collect_texts()
-    .pipe D.HTML.$disperse_texts settings[ 'hyphenation' ] ? null
-    # .pipe D.$show()
+@is_wrapped = ( me ) ->
+  tag_stack       = []
+  last_chunk_idx  = me.length - 1
+  ### TAINT use library method ###
+  name_from_tag   = ( tag ) -> tag.replace /^<\/?([^\s>]+).*$/, '$1'
+  #.........................................................................................................
+  for chunk, chunk_idx in me
+    [ open_tags, text, close_tags, ]  = chunk
+    return false if chunk_idx is 0 and open_tags.length is 0
+    is_last_chunk                     = chunk_idx is last_chunk_idx
+    last_tag_idx                      = close_tags.length - 1
+    ( tag_stack.push name_from_tag open_tag ) for open_tag in open_tags
     #.......................................................................................................
-    .pipe do =>
-      Z         = @_new_hotml()
-      last_type = null
-      #.....................................................................................................
-      return $ ( event, send, end ) =>
-        _send = send
-        #...................................................................................................
-        if event?
-          [ type, tail..., ] = event
-          #...................................................................................................
-          switch type
-            #.................................................................................................
-            when 'text', 'lone-tag'
-              if type is 'text' then  text = tail[ 0 ]
-              else                    text = @_render_open_tag tail...
-              # debug '©Kx7Vl', ( rpr tail[ 0 ] ), text_parts
-              switch last_type
-                #.............................................................................................
-                when null, 'close-tag', 'lone-tag', 'text'
-                  Z.push chunk  = @_new_chunk()
-                  chunk[ 1 ]    = text
-                #.............................................................................................
-                when 'open-tag'
-                  ( CND.last_of Z )[ 1 ] = text
-                #.............................................................................................
-                else
-                  return handler new Error "1 ignored event of type #{rpr type}"
-            #.................................................................................................
-            when 'open-tag'
-              switch last_type
-                #.............................................................................................
-                when 'text', null, 'lone-tag', 'close-tag'
-                  Z.push [ open_tags, ... ] = @_new_chunk()
-                  open_tags.push @_render_open_tag tail...
-                #.............................................................................................
-                when 'open-tag'
-                  ( CND.last_of Z )[ 0 ].push @_render_open_tag tail...
-                #.............................................................................................
-                else
-                  return handler new Error "2 ignored event of type #{rpr type}"
-            #.................................................................................................
-            when 'close-tag'
-              switch last_type
-                #.............................................................................................
-                when null
-                  throw new Error "encountered illegal HTML"
-                #.............................................................................................
-                when 'text', 'lone-tag', 'close-tag', 'open-tag'
-                  ( CND.last_of Z )[ 2 ].push @_render_close_tag tail...
-                #.............................................................................................
-                else
-                  return handler new Error "3 ignored event of type #{rpr type}"
-            #.................................................................................................
-            else
-              return handler new Error "4 ignored event of type #{rpr type}"
-          #...................................................................................................
-          last_type = type
-        #...................................................................................................
-        if end?
-          handler null, Z
-  #---------------------------------------------------------------------------------------------------------
-  input.write html
-  input.end()
+    for close_tag, tag_idx in close_tags
+      is_last_tag     = is_last_chunk and tag_idx is last_tag_idx
+      close_tag_name  = name_from_tag close_tag
+      open_tag_name   = tag_stack.pop()
+      unless open_tag_name is close_tag_name
+        throw new Error "unbalanced tags: #{rpr open_tag_name} isnt #{rpr close_tag_name}"
+      return is_last_tag if tag_stack.length is 0
+  #.........................................................................................................
+  return false
 
+#-----------------------------------------------------------------------------------------------------------
+@unwrap = ( me, silent = no ) ->
+  if @is_wrapped me
+    ( CND.first_of me )[ 0 ].shift()
+    ( CND.last_of  me )[ 2 ].pop()
+  else unless silent
+    throw new Error "HTML does not form a wrapped structure"
+  return me
 
 #===========================================================================================================
 # LINE BREAKING
 #-----------------------------------------------------------------------------------------------------------
-@break_lines = ( html, test_line, set_line, handler ) ->
-  switch arity = arguments.length
-    when 3
-      handler   = set_line
-      set_line  = null
-    when 4
-      null
+@break_lines = ( me, test_line, set_line ) ->
+  # switch arity = arguments.length
+  #   when 3
+  #     handler   = set_line
+  #     set_line  = null
+  #   when 4
+  #     null
+  #   else
+  #     throw new Error "expected 3 or 4 arguments, got #{arity}"
+  # #---------------------------------------------------------------------------------------------------------
+  # @.parse html, ( error, hotml ) =>
+  #   return handler error if error?
+  start             = 0
+  stop              = start
+  last_slice        = null
+  lines             = []
+  slice             = null
+  is_first_line     = yes
+  is_last_line      = no
+  is_first_try      = yes
+  #.......................................................................................................
+  loop
+    stop        += 1
+    is_last_line = ( stop > me.length ) or ( stop - start is 0 and stop == me.length )
+    #.....................................................................................................
+    if is_last_line
+      if last_slice?
+        set_line last_slice, is_first_line, is_last_line if set_line?
+        lines.push last_slice
+      else if slice?
+        set_line slice, is_first_line, is_last_line if set_line?
+        lines.push slice
+      return lines
+    #.....................................................................................................
+    slice = @slice me, start, stop
+    fits  = test_line slice, is_first_line, is_last_line
+    #.....................................................................................................
+    if fits
+      last_slice        = slice
     else
-      throw new Error "expected 3 or 4 arguments, got #{arity}"
-  #---------------------------------------------------------------------------------------------------------
-  @.parse html, ( error, hotml ) =>
-    return handler error if error?
-    start             = 0
-    stop              = start
-    last_slice        = null
-    last_slice_hotml  = null
-    lines             = []
-    slice             = null
-    is_first_line     = yes
-    is_last_line      = no
-    is_first_try      = yes
-    #.......................................................................................................
-    loop
-      stop   += 1
-      is_last_line = ( stop > hotml.length ) or ( stop - start is 0 and stop == hotml.length )
-      #.....................................................................................................
-      if is_last_line
-        if last_slice?
-          set_line last_slice, is_first_line, is_last_line, last_slice_hotml if set_line?
-          lines.push last_slice
-        else if slice?
-          set_line slice, is_first_line, is_last_line, slice_hotml if set_line?
-          lines.push slice
-        return handler null, lines
-      #.....................................................................................................
-      slice_hotml = @slice hotml, start, stop
-      slice       = @as_html slice_hotml
-      fits        = test_line slice, is_first_line, is_last_line, slice_hotml
-      #.....................................................................................................
-      if fits
-        last_slice        = slice
-        last_slice_hotml  = slice_hotml
+      #...................................................................................................
+      if last_slice?
+        set_line last_slice, is_first_line, is_last_line if set_line?
+        lines.push last_slice
+        last_slice  = null
+        start       = stop - 1
+        stop        = start
+      #...................................................................................................
       else
-        #...................................................................................................
-        if last_slice?
-          set_line last_slice, is_first_line, is_last_line, last_slice_hotml if set_line?
-          lines.push last_slice
-          last_slice  = null
-          start       = stop - 1
-          stop        = start
-        #...................................................................................................
-        else
-          set_line slice, is_first_line, is_last_line, slice_hotml if set_line?
-          lines.push slice
-          slice = null
-          start = stop
-          stop  = start
-        #...................................................................................................
-        is_first_line = no
-
-#-----------------------------------------------------------------------------------------------------------
-@$break_lines = ( test_line ) ->
-  return $ ( html, send ) =>
-    @break_lines html, test_line, null, ( error, lines ) =>
-      send lines
+        set_line slice, is_first_line, is_last_line if set_line?
+        lines.push slice
+        slice = null
+        start = stop
+        stop  = start
+      #...................................................................................................
+      is_first_line = no
+  #.......................................................................................................
+  throw new Error "should never happen"
+  return null
 
 
 #===========================================================================================================

@@ -25,7 +25,6 @@
   "dependencies": {
     "cnd": "^0.1.5",
     "coffeenode-teacup": "^0.1.4",
-    "guy-test": "^0.1.12",
-    "pipedreams2": "^0.2.11"
+    "guy-test": "^0.1.12"
   }
 }
