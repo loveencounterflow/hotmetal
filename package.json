@@ -25,6 +25,12 @@
   "dependencies": {
     "cnd": "^0.1.5",
     "coffeenode-teacup": "^0.1.4",
-    "guy-test": "^0.1.12"
+    "guy-test": "^0.1.12",
+    "hyphenation.en-us": "^0.2.1",
+    "hypher": "^0.2.3",
+    "linebreak": "^0.3.0",
+    "markdown-it": "^3.0.7",
+    "parse5": "^1.4.0",
+    "typogr": "^0.6.5"
   }
 }

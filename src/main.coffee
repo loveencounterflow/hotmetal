@@ -18,6 +18,7 @@ TEACUP                    = require 'coffeenode-teacup'
 # D                         = require 'pipedreams2'
 # $                         = D.remit.bind D
 
+
 #===========================================================================================================
 # HELPERS
 #-----------------------------------------------------------------------------------------------------------
@@ -110,17 +111,22 @@ TEACUP                    = require 'coffeenode-teacup'
   #.........................................................................................................
   return me
 
+#-----------------------------------------------------------------------------------------------------------
+@copy = ( me ) ->
+  ( [ chunk[ 0 ][ .. ], chunk[ 1 ], chunk[ 2 ][ .. ] ] for chunk in me )
+
 
 #===========================================================================================================
 # SLICING
 #-----------------------------------------------------------------------------------------------------------
 @slice = ( me, start = 0, stop = null ) ->
-  stop              ?= me.length
-  start              = Math.max 0, Math.min me.length, start
-  stop               = Math.max 0, Math.min me.length, stop
+  stop             ?= me.length
+  start             = Math.max 0, Math.min me.length, start
+  stop              = Math.max 0, Math.min me.length, stop
   #.........................................................................................................
   return [] if start >= stop
-  R                 = CND.LODASH.cloneDeep me
+  # R                 = CND.LODASH.cloneDeep me
+  R                 = @copy me
   return R if start is 0 and stop is me.length
   #.........................................................................................................
   R                 = R.slice start, stop
@@ -217,22 +223,21 @@ TEACUP                    = require 'coffeenode-teacup'
     throw new Error "HTML does not form a wrapped structure"
   return me
 
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
 
 #===========================================================================================================
 # LINE BREAKING
 #-----------------------------------------------------------------------------------------------------------
 @break_lines = ( me, test_line, set_line ) ->
-  # switch arity = arguments.length
-  #   when 3
-  #     handler   = set_line
-  #     set_line  = null
-  #   when 4
-  #     null
-  #   else
-  #     throw new Error "expected 3 or 4 arguments, got #{arity}"
-  # #---------------------------------------------------------------------------------------------------------
-  # @.parse html, ( error, hotml ) =>
-  #   return handler error if error?
   start             = 0
   stop              = start
   last_slice        = null
@@ -274,8 +279,138 @@ TEACUP                    = require 'coffeenode-teacup'
       is_first_line = no
   #.......................................................................................................
   throw new Error "should never happen"
-  return null
 
+
+#===========================================================================================================
+# UNICODE LINE BREAKING
+#-----------------------------------------------------------------------------------------------------------
+@fragmentize = ( text, settings ) ->
+  text            = text.replace /\n/g, ' '
+  last_position   = null
+  incremental     = settings?[ 'incremental'  ] ? yes
+  extended        = settings?[ 'extended'     ] ? no
+  #.........................................................................................................
+  line_breaker    = new ( require 'linebreak' ) text
+  R               = []
+  #.......................................................................................................
+  while breakpoint = line_breaker.nextBreak()
+    { position, required, } = breakpoint
+    #.....................................................................................................
+    if incremental and last_position? then  part = text[ last_position ... breakpoint.position ]
+    else                                    part = text[               ... breakpoint.position ]
+    last_position = position
+    R.push if extended then [ part, required, position, ] else part
+  #.......................................................................................................
+  return R
+
+
+#===========================================================================================================
+# HYPHENATION
+#-----------------------------------------------------------------------------------------------------------
+@new_hyphenate = ( hyphenation = null, min_length = 2 ) ->
+  ### https://github.com/bramstein/hypher ###
+  Hypher        = require 'hypher'
+  hyphenation  ?= require 'hyphenation.en-us'
+  HYPHER        = new Hypher hyphenation
+  return HYPHER.hyphenateText.bind HYPHER
+
+
+#===========================================================================================================
+# TYPOGRAPHIC ENHANCEMENTS
+#-----------------------------------------------------------------------------------------------------------
+@TYPO = {}
+@TYPO.quotes = ( text ) => ( require 'typogr' ).smartypants text
+@TYPO.dashes = ( text ) => ( require 'typogr' ).smartypants text
+
+
+#===========================================================================================================
+# MARKDOWN
+#-----------------------------------------------------------------------------------------------------------
+@MD = {}
+
+#-----------------------------------------------------------------------------------------------------------
+@MD.new_parser = ( settings ) =>
+  throw new Error "settings not yet supported" if settings?
+  settings =
+    html: true,
+    linkify: true,
+    typographer: true
+  MarkdownIt  = require 'markdown-it'
+  return new MarkdownIt settings
+
+#-----------------------------------------------------------------------------------------------------------
+@MD.as_html = ( md, parser = null ) =>
+  return ( parser ? @new_parser() ).render md
+
+
+
+#===========================================================================================================
+# HTML PARSING
+#-----------------------------------------------------------------------------------------------------------
+@HTML = {}
+
+#---------------------------------------------------------------------------------------------------------
+@HTML.parse = ( html, disperse = yes, hyphenation = yes ) =>
+  lone_tags = """area base br col command embed hr img input keygen link meta param
+    source track wbr""".split /\s+/
+  #.........................................................................................................
+  if disperse
+    fragmentize = @fragmentize.bind @
+    if hyphenation is false
+      hyphenate   = ( text ) => text
+    else if CND.isa_function hyphenation
+      hyphenate   = hyphenation
+    else
+      hyphenation = if hyphenation is true then null else hyphenation
+      hyphenate   = @new_hyphenate hyphenation
+  #.........................................................................................................
+  else
+    fragmentize = ( text ) -> [ text, ]
+    hyphenate   = ( text ) => text
+  #.........................................................................................................
+  handlers =
+    #.......................................................................................................
+    doctype:  ( name, pid, sid ) => @add R, 'doctype',   name, pid, sid
+    endTag:   ( name )           => @add R, 'close-tag', name
+    comment:  ( text )           => @add R, 'comment',   CND.escape_html text
+    #.......................................................................................................
+    text:     ( text ) =>
+      text  = CND.escape_html text
+      text  = hyphenate text
+      for text_part in fragmentize text
+        @add R, 'text', text_part
+    #.......................................................................................................
+    startTag: ( name, a ) =>
+      attributes = {}
+      ( attributes[ k ] = v for { name: k, value: v, } in a ) if a?
+      #.....................................................................................................
+      if name in lone_tags
+        if name is 'wbr'
+          throw new Error "illegal <wbr> tag with attributes" if ( Object.keys attributes ).length > 0
+          ### as per https://developer.mozilla.org/en/docs/Web/HTML/Element/wbr ###
+          @add R, 'text', '\u200b'
+        else
+          @add R, 'lone-tag', name, attributes
+      #.....................................................................................................
+      else
+        @add R, 'open-tag', name, attributes
+  #.........................................................................................................
+  parser    = new ( require 'parse5' ).SimpleApiParser handlers
+  R         = @_new_hotml()
+  parser.parse html
+  #.........................................................................................................
+  return R
+
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
 
 #===========================================================================================================
 # BALANCED COLUMNS
