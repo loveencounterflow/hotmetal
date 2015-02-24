@@ -23,25 +23,32 @@ TEACUP                    = require 'coffeenode-teacup'
 # HELPERS
 #-----------------------------------------------------------------------------------------------------------
 @rpr = ( me ) ->
-  return '\n' + CND.columnify me, { paddingChr: '_', }
+  R = []
+  for chunk, idx in me
+    [ open_tags, content, close_tags, ] = chunk
+    R.push [ Ro = [], Rt = [], Rc = [] ]
+    Ro.push @_render_open_tag t... for t in open_tags
+    Rt.push if CND.isa_list content then @_render_open_tag content... else content
+    Rc.push @_render_close_tag t for t in close_tags
+  return '\n' + CND.columnify R, { paddingChr: '_', }
 
 #-----------------------------------------------------------------------------------------------------------
 @as_html = ( me ) ->
   R = []
   for chunk, idx in me
     [ open_tags, text, close_tags, ] = chunk
-    R.push t for t in open_tags
+    R.push @_render_open_tag t... for t in open_tags
     R.push @_correct_text me, chunk, idx
-    R.push t for t in close_tags
+    R.push @_render_close_tag t for t in close_tags
   return R.join ''
 
 #-----------------------------------------------------------------------------------------------------------
 @_correct_text = ( me, chunk, idx ) ->
-  [ open_tags, text, close_tags, ] = chunk
-  return text if text.length > 0 and text[ 0 ] is '<'
+  [ open_tags, content, close_tags, ] = chunk
+  return @_render_open_tag content... if CND.isa_list content
   is_last = idx is me.length - 1
   #.........................................................................................................
-  R = text
+  R = content
   R = R.replace /\xad$/,    if is_last then '-' else ''
   R = R.replace /\s+$/, ''  if is_last
   #.........................................................................................................
@@ -92,16 +99,19 @@ TEACUP                    = require 'coffeenode-teacup'
   switch type
     #.......................................................................................................
     when 'open-tag'
-      target[ 0 ].push @_render_open_tag tail...
+      target[ 0 ].push tail
+      # target[ 0 ].push @_render_open_tag tail...
     #.......................................................................................................
     when 'lone-tag'
-      target[ 1 ] = @_render_open_tag tail...
+      target[ 1 ] = tail
+      # target[ 1 ] = @_render_open_tag tail...
     #.......................................................................................................
     when 'lone-tag', 'text'
       target[ 1 ] = tail[ 0 ]
     #.......................................................................................................
     when 'close-tag'
-      target[ 2 ].push @_render_close_tag tail[ 0 ]
+      target[ 2 ].push tail[ 0 ]
+      # target[ 2 ].push @_render_close_tag tail[ 0 ]
     #.......................................................................................................
     when 'comment', 'doctype'
       null
@@ -147,11 +157,12 @@ TEACUP                    = require 'coffeenode-teacup'
   #.........................................................................................................
   ### Closing all remaining open tags: ###
   for [ open_tags, text, close_tags, ] in R
-    tag_stack.push open_tag for open_tag in open_tags
+    tag_stack.push open_tag[ 0 ] for open_tag in open_tags
     tag_stack.pop() for close_tag in close_tags
   # debug '©9Gwy3', tag_stack
   for idx in [ tag_stack.length - 1 .. 0 ] by -1
-    last_close_tags.push @_render_as_close_tag tag_stack[ idx ]
+    last_close_tags.push tag_stack[ idx ]
+    # last_close_tags.push @_render_as_close_tag tag_stack[ idx ]
   #.........................................................................................................
   return R
 
@@ -196,17 +207,16 @@ TEACUP                    = require 'coffeenode-teacup'
   tag_stack       = []
   last_chunk_idx  = me.length - 1
   ### TAINT use library method ###
-  name_from_tag   = ( tag ) -> tag.replace /^<\/?([^\s>]+).*$/, '$1'
+  # name_from_tag   = ( tag ) -> tag.replace /^<\/?([^\s>]+).*$/, '$1'
   #.........................................................................................................
   for [ open_tags, text, close_tags, ], chunk_idx in me
     return false if chunk_idx is 0 and open_tags.length is 0
     is_last_chunk                     = chunk_idx is last_chunk_idx
     last_tag_idx                      = close_tags.length - 1
-    ( tag_stack.push name_from_tag open_tag ) for open_tag in open_tags
+    ( tag_stack.push open_tag[ 0 ] ) for open_tag in open_tags
     #.......................................................................................................
-    for close_tag, tag_idx in close_tags
+    for close_tag_name, tag_idx in close_tags
       is_last_tag     = is_last_chunk and tag_idx is last_tag_idx
-      close_tag_name  = name_from_tag close_tag
       open_tag_name   = tag_stack.pop()
       unless open_tag_name is close_tag_name
         throw new Error "unbalanced tags: #{rpr open_tag_name} isnt #{rpr close_tag_name}"
