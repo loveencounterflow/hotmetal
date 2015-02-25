@@ -127,6 +127,20 @@ TEACUP                    = require 'coffeenode-teacup'
 
 
 #===========================================================================================================
+# TAG MANIPULATION
+#-----------------------------------------------------------------------------------------------------------
+@TAG = {}
+
+#-----------------------------------------------------------------------------------------------------------
+@TAG.add_class = ( tag, clasz ) =>
+  attributes = tag[ 1 ]
+  if attributes[ 'class' ]?
+    attributes[ 'class' ] += ' ' + clasz
+  else
+    attributes[ 'class' ] = clasz
+  return tag
+
+#===========================================================================================================
 # SLICING
 #-----------------------------------------------------------------------------------------------------------
 @slice = ( me, start = 0, stop = null ) ->
@@ -247,7 +261,7 @@ TEACUP                    = require 'coffeenode-teacup'
 #===========================================================================================================
 # LINE BREAKING
 #-----------------------------------------------------------------------------------------------------------
-@break_lines = ( me, test_line, set_line ) ->
+@break_lines = ( me, test_line ) ->
   start             = 0
   stop              = start
   last_slice        = null
@@ -262,26 +276,26 @@ TEACUP                    = require 'coffeenode-teacup'
     #.....................................................................................................
     if is_last_line
       if last_slice?
-        set_line last_slice, is_first_line, is_last_line if set_line?
+        test_line 'set', last_slice, is_first_line, is_last_line
       else if slice?
-        set_line slice, is_first_line, is_last_line if set_line?
+        test_line 'set',      slice, is_first_line, is_last_line
       return null
     #.....................................................................................................
-    slice = @slice me, start, stop
-    fits  = test_line slice, is_first_line, is_last_line
+    slice     = @slice me, start, stop
+    fits      = test_line 'test', slice, is_first_line, is_last_line
     #.....................................................................................................
     if fits
       last_slice        = slice
     else
       #...................................................................................................
       if last_slice?
-        set_line last_slice, is_first_line, is_last_line if set_line?
+        test_line 'set', last_slice, is_first_line, is_last_line
         last_slice  = null
         start       = stop - 1
         stop        = start
       #...................................................................................................
       else
-        set_line slice, is_first_line, is_last_line if set_line?
+        test_line 'set', slice, is_first_line, is_last_line
         slice = null
         start = stop
         stop  = start
@@ -289,6 +303,50 @@ TEACUP                    = require 'coffeenode-teacup'
       is_first_line = no
   #.......................................................................................................
   throw new Error "should never happen"
+
+# #-----------------------------------------------------------------------------------------------------------
+# @break_lines = ( me, test_line, set_line ) ->
+#   start             = 0
+#   stop              = start
+#   last_slice        = null
+#   slice             = null
+#   is_first_line     = yes
+#   is_last_line      = no
+#   is_first_try      = yes
+#   #.......................................................................................................
+#   loop
+#     stop        += 1
+#     is_last_line = ( stop > me.length ) or ( stop - start is 0 and stop == me.length )
+#     #.....................................................................................................
+#     if is_last_line
+#       if last_slice?
+#         set_line last_slice, is_first_line, is_last_line if set_line?
+#       else if slice?
+#         set_line slice, is_first_line, is_last_line if set_line?
+#       return null
+#     #.....................................................................................................
+#     slice = @slice me, start, stop
+#     fits  = test_line slice, is_first_line, is_last_line
+#     #.....................................................................................................
+#     if fits
+#       last_slice        = slice
+#     else
+#       #...................................................................................................
+#       if last_slice?
+#         set_line last_slice, is_first_line, is_last_line if set_line?
+#         last_slice  = null
+#         start       = stop - 1
+#         stop        = start
+#       #...................................................................................................
+#       else
+#         set_line slice, is_first_line, is_last_line if set_line?
+#         slice = null
+#         start = stop
+#         stop  = start
+#       #...................................................................................................
+#       is_first_line = no
+#   #.......................................................................................................
+#   throw new Error "should never happen"
 
 
 #===========================================================================================================
@@ -350,8 +408,7 @@ TEACUP                    = require 'coffeenode-teacup'
 
 #-----------------------------------------------------------------------------------------------------------
 @MD.as_html = ( md, parser = null ) =>
-  return ( parser ? @new_parser() ).render md
-
+  return ( parser ? @MD.new_parser() ).render md
 
 
 #===========================================================================================================
