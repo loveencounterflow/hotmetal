@@ -400,9 +400,12 @@ TEACUP                    = require 'coffeenode-teacup'
 @MD.new_parser = ( settings ) =>
   throw new Error "settings not yet supported" if settings?
   settings =
-    html: true,
-    linkify: true,
-    typographer: true
+    html:         true
+    linkify:      false
+    breaks:       false
+    langPrefix:   'codelang-'
+    typographer:  true
+    quotes:       '“”‘’'
   MarkdownIt  = require 'markdown-it'
   return new MarkdownIt settings
 
@@ -418,6 +421,7 @@ TEACUP                    = require 'coffeenode-teacup'
 
 #---------------------------------------------------------------------------------------------------------
 @HTML.parse = ( html, disperse = yes, hyphenation = yes ) =>
+  ### TAINT words in code blocks will be hyphenated, too ###
   lone_tags = """area base br col command embed hr img input keygen link meta param
     source track wbr""".split /\s+/
   #.........................................................................................................
