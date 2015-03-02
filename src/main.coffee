@@ -33,23 +33,24 @@ TEACUP                    = require 'coffeenode-teacup'
   return '\n' + CND.columnify R, { paddingChr: '_', }
 
 #-----------------------------------------------------------------------------------------------------------
-@as_html = ( me ) ->
+@as_html = ( me, replace_shy = yes ) ->
   R = []
   for chunk, idx in me
     [ open_tags, text, close_tags, ] = chunk
     R.push @_render_open_tag t... for t in open_tags
-    R.push @_correct_text me, chunk, idx
+    R.push @_correct_text me, chunk, idx, replace_shy
     R.push @_render_close_tag t for t in close_tags
   return R.join ''
 
 #-----------------------------------------------------------------------------------------------------------
-@_correct_text = ( me, chunk, idx ) ->
+@_correct_text = ( me, chunk, idx, replace_shy ) ->
   [ open_tags, content, close_tags, ] = chunk
   return @_render_open_tag content... if CND.isa_list content
   is_last = idx is me.length - 1
   #.........................................................................................................
   R = content
-  R = R.replace /\xad$/,    if is_last then '-' else ''
+  if replace_shy
+    R = R.replace /\xad$/,    if is_last then '-' else ''
   R = R.replace /\s+$/, ''  if is_last
   #.........................................................................................................
   return R
