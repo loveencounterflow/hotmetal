@@ -304,24 +304,24 @@ handle = ( handler ) ->
   T.eq match, H.as_html hotml
   done()
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "Line breaking 1" ] = ( T, done ) ->
-  lines = []
-  #.........................................................................................................
-  test_line = ( hotml ) ->
-    return ( ( chunk[ 1 ] for chunk in hotml ).join '' ).length < 20
-  #.........................................................................................................
-  set_line = ( hotml ) ->
-    lines.push hotml
-  #.........................................................................................................
-  html  = """Paragraph internationalization assignment (certainly) relativity."""
-  match = [[[[],"Para­",[]],[[],"graph ",[]],[[],"in­",[]],[[],"ter­",[]]],[[[],"na­",[]],[[],"tion­",[]],[[],"al­",[]],[[],"iza­",[]]],[[[],"tion ",[]],[[],"as­",[]],[[],"sign­",[]],[[],"ment ",[]]],[[[],"(cer­",[]],[[],"tainly) ",[]],[[],"rel­",[]],[[],"a­",[]]],[[[],"tiv­",[]],[[],"ity.",[]]]]
-  hotml = H.HTML.parse html
-  H.break_lines hotml, test_line, set_line
-  # urge JSON.stringify lines
-  # urge H.rpr line for line in lines
-  T.eq match, lines
-  done()
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "Line breaking 1" ] = ( T, done ) ->
+#   lines = []
+#   #.........................................................................................................
+#   test_line = ( hotml ) ->
+#     return ( ( chunk[ 1 ] for chunk in hotml ).join '' ).length < 20
+#   #.........................................................................................................
+#   set_line = ( hotml ) ->
+#     lines.push hotml
+#   #.........................................................................................................
+#   html  = """Paragraph internationalization assignment (certainly) relativity."""
+#   match = [[[[],"Para­",[]],[[],"graph ",[]],[[],"in­",[]],[[],"ter­",[]]],[[[],"na­",[]],[[],"tion­",[]],[[],"al­",[]],[[],"iza­",[]]],[[[],"tion ",[]],[[],"as­",[]],[[],"sign­",[]],[[],"ment ",[]]],[[[],"(cer­",[]],[[],"tainly) ",[]],[[],"rel­",[]],[[],"a­",[]]],[[[],"tiv­",[]],[[],"ity.",[]]]]
+#   hotml = H.HTML.parse html
+#   H.break_lines hotml, test_line, set_line
+#   # urge JSON.stringify lines
+#   # urge H.rpr line for line in lines
+#   T.eq match, lines
+#   done()
 
 # # #-----------------------------------------------------------------------------------------------------------
 # # @[ "Line breaking 2" ] = ( T, done ) ->

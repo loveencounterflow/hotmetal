@@ -24,6 +24,7 @@
   "homepage": "https://github.com/loveencounterflow/hotmetal",
   "dependencies": {
     "cnd": "^0.1.5",
+    "coffeenode-markdown-it": "^4.1.1",
     "coffeenode-teacup": "^0.1.4",
     "guy-test": "^0.1.12",
     "hyphenation.en-us": "^0.2.1",

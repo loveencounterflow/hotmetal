@@ -60,6 +60,7 @@ TEACUP                    = require 'coffeenode-teacup'
 # TAG RENDERING
 #-----------------------------------------------------------------------------------------------------------
 @_render_open_tag = ( name, attributes ) ->
+  ### TAINT inefficient ###
   return ( @_render_empty_tag name, attributes ).replace /<\/[^>]+>$/, ''
 
 #-----------------------------------------------------------------------------------------------------------
@@ -68,11 +69,18 @@ TEACUP                    = require 'coffeenode-teacup'
 
 #-----------------------------------------------------------------------------------------------------------
 @_render_as_close_tag = ( open_tag ) ->
+  ### TAINT inefficient ###
   return @_render_close_tag open_tag.replace /^<([^\s>]+).*$/, '$1'
 
 #-----------------------------------------------------------------------------------------------------------
 @_render_empty_tag = ( name, attributes ) ->
-  return TEACUP.render => TEACUP.TAG name, attributes
+  # debug '©VKm6q', attributes
+  ### TAINT inefficient ###
+  ### TAINT won't honor repeate names ###
+  a = {}
+  if attributes?
+    a[ attribute[ 'name' ] ] = attribute[ 'value' ] for attribute in attributes
+  return TEACUP.render => TEACUP.TAG name, a
 
 
 #===========================================================================================================
@@ -123,8 +131,8 @@ TEACUP                    = require 'coffeenode-teacup'
   return me
 
 #-----------------------------------------------------------------------------------------------------------
-@copy = ( me ) ->
-  ( [ chunk[ 0 ][ .. ], chunk[ 1 ], chunk[ 2 ][ .. ] ] for chunk in me )
+# @copy = ( me ) ->
+#   ( [ chunk[ 0 ][ .. ], chunk[ 1 ], chunk[ 2 ][ .. ] ] for chunk in me )
 
 
 #===========================================================================================================
@@ -150,8 +158,8 @@ TEACUP                    = require 'coffeenode-teacup'
   stop              = Math.max 0, Math.min me.length, stop
   #.........................................................................................................
   return [] if start >= stop
-  # R                 = CND.LODASH.cloneDeep me
-  R                 = @copy me
+  R                 = CND.LODASH.cloneDeep me
+  # R                 = @copy me
   return R if start is 0 and stop is me.length
   #.........................................................................................................
   R                 = R.slice start, stop
@@ -168,7 +176,7 @@ TEACUP                    = require 'coffeenode-teacup'
     for sub_idx in [ open_tags.length - 1 .. 0 ] by -1
       open_tag_count += 1
       continue unless open_tag_count > 0
-      first_open_tags.unshift open_tags[ sub_idx ]
+      first_open_tags.unshift CND.LODASH.cloneDeep open_tags[ sub_idx ]
   #.........................................................................................................
   ### Closing all remaining open tags: ###
   for [ open_tags, text, close_tags, ] in R
@@ -357,18 +365,30 @@ TEACUP                    = require 'coffeenode-teacup'
   text            = text.replace /\n/g, ' '
   last_position   = null
   incremental     = settings?[ 'incremental'  ] ? yes
+  chrs            = settings?[ 'chrs'         ] ? no
   extended        = settings?[ 'extended'     ] ? no
+  throw new Error "setting `extended` not supported" if extended
+  whitespace      = settings?[ 'whitespace'   ] ? no
+  matcher         = if whitespace then /(\s+)/ else null
   #.........................................................................................................
-  line_breaker    = new ( require 'linebreak' ) text
-  R               = []
-  #.......................................................................................................
-  while breakpoint = line_breaker.nextBreak()
-    { position, required, } = breakpoint
-    #.....................................................................................................
-    if incremental and last_position? then  part = text[ last_position ... breakpoint.position ]
-    else                                    part = text[               ... breakpoint.position ]
-    last_position = position
-    R.push if extended then [ part, required, position, ] else part
+  if chrs
+    shreds = text.split /// ( (?: [  \ud800-\udbff ] [ \udc00-\udfff ] ) | . ) ///
+    R = ( shred for shred in shreds when shred isnt '' )
+  #.........................................................................................................
+  else
+    line_breaker    = new ( require 'linebreak' ) text
+    R               = []
+    #.......................................................................................................
+    while breakpoint = line_breaker.nextBreak()
+      { position, required, } = breakpoint
+      #.....................................................................................................
+      if incremental and last_position? then  part = text[ last_position ... breakpoint.position ]
+      else                                    part = text[               ... breakpoint.position ]
+      last_position = position
+      if whitespace
+        R.push subpart for subpart in part.split matcher when subpart.length > 0
+      else
+        R.push part
   #.......................................................................................................
   return R
 
@@ -407,8 +427,16 @@ TEACUP                    = require 'coffeenode-teacup'
     langPrefix:   'codelang-'
     typographer:  true
     quotes:       '“”‘’'
-  MarkdownIt  = require 'markdown-it'
-  return new MarkdownIt settings
+  # MarkdownIt  = require 'markdown-it'
+  # return new MarkdownIt settings
+  source_references = require 'coffeenode-markdown-it/lib/rules_core/source_references'
+  R = ( require 'coffeenode-markdown-it' ) settings
+  ### TAINT now is the time to active settings ###
+  R = R.use source_references
+  # R = R.use source_references, { template: "<rf loc='${start},${stop}'></rf>", }
+  # R = R.use source_references, { template: "<!--@(${start},${stop})-->", }
+  return R
+
 
 #-----------------------------------------------------------------------------------------------------------
 @MD.as_html = ( md, parser = null ) =>
@@ -420,25 +448,32 @@ TEACUP                    = require 'coffeenode-teacup'
 #-----------------------------------------------------------------------------------------------------------
 @HTML = {}
 
-#---------------------------------------------------------------------------------------------------------
-@HTML.parse = ( html, disperse = yes, hyphenation = yes ) =>
-  ### TAINT words in code blocks will be hyphenated, too ###
-  lone_tags = """area base br col command embed hr img input keygen link meta param
+#-----------------------------------------------------------------------------------------------------------
+@HTML._lone_tags = """area base br col command embed hr img input keygen link meta param
     source track wbr""".split /\s+/
+
+#---------------------------------------------------------------------------------------------------------
+@HTML.parse = ( html, settings ) =>
+  ### TAINT words in code blocks will be hyphenated, too ###
+  disperse              = settings?[ 'disperse'     ] ? yes
+  hyphenation           = settings?[ 'hyphenation'  ] ? yes
+  whitespace            = settings?[ 'whitespace'   ] ? no
+  chrs                  = settings?[ 'chrs'         ] ? no
+  fragmentize_settings  = { whitespace, chrs, }
   #.........................................................................................................
   if disperse
     fragmentize = @fragmentize.bind @
-    if hyphenation is false
-      hyphenate   = ( text ) => text
-    else if CND.isa_function hyphenation
-      hyphenate   = hyphenation
-    else
-      hyphenation = if hyphenation is true then null else hyphenation
-      hyphenate   = @new_hyphenate hyphenation
   #.........................................................................................................
   else
     fragmentize = ( text ) -> [ text, ]
+  #.........................................................................................................
+  if hyphenation is false
     hyphenate   = ( text ) => text
+  else if CND.isa_function hyphenation
+    hyphenate   = hyphenation
+  else
+    hyphenation = if hyphenation is true then null else hyphenation
+    hyphenate   = @new_hyphenate hyphenation
   #.........................................................................................................
   handlers =
     #.......................................................................................................
@@ -449,14 +484,14 @@ TEACUP                    = require 'coffeenode-teacup'
     text:     ( text ) =>
       text  = CND.escape_html text
       text  = hyphenate text
-      for text_part in fragmentize text
+      for text_part in fragmentize text, fragmentize_settings
         @add R, 'text', text_part
     #.......................................................................................................
     startTag: ( name, a ) =>
       attributes = {}
       ( attributes[ k ] = v for { name: k, value: v, } in a ) if a?
       #.....................................................................................................
-      if name in lone_tags
+      if name in @HTML._lone_tags
         if name is 'wbr'
           throw new Error "illegal <wbr> tag with attributes" if ( Object.keys attributes ).length > 0
           ### as per https://developer.mozilla.org/en/docs/Web/HTML/Element/wbr ###
@@ -469,6 +504,86 @@ TEACUP                    = require 'coffeenode-teacup'
   #.........................................................................................................
   parser    = new ( require 'parse5' ).SimpleApiParser handlers
   R         = @_new_hotml()
+  parser.parse html
+  #.........................................................................................................
+  return R
+
+#---------------------------------------------------------------------------------------------------------
+@HTML.split = ( html, settings ) =>
+  ### A faster parse routine that returns a list whose elements alternatively represent tags and
+  texts.
+
+  In the returned list, elements at even indices are always single texts representing openening and closing
+  tags, while the elements at odd indices are either single texts (when `disperse` was `false`) or lists
+  of texts (when `disperse` was `true`) representing textual contents.  ###
+  ### TAINT code duplication ###
+  disperse              = settings?[ 'disperse'     ] ? yes
+  hyphenation           = settings?[ 'hyphenation'  ] ? yes
+  whitespace            = settings?[ 'whitespace'   ] ? no
+  chrs                  = settings?[ 'chrs'         ] ? no
+  fragmentize_settings  = { whitespace, chrs, }
+  last_type             = null
+  #.........................................................................................................
+  if disperse
+    fragmentize = @fragmentize.bind @
+  #.........................................................................................................
+  else
+    fragmentize = ( text ) -> [ text, ]
+  #.........................................................................................................
+  if hyphenation is false
+    hyphenate   = ( text ) => text
+  else if CND.isa_function hyphenation
+    hyphenate   = hyphenation
+  else
+    hyphenation = if hyphenation is true then null else hyphenation
+    hyphenate   = @new_hyphenate hyphenation
+  #.........................................................................................................
+  handlers =
+    #.......................................................................................................
+    doctype:  ( name, pid, sid ) => throw new Error "not implemented" # @add R, 'doctype',   name, pid, sid
+    #.......................................................................................................
+    comment: ( text ) =>
+      # debug '©S9IOL', R
+      # debug '©RlDtj', rpr text
+      # throw new Error "not implemented" # @add R, 'comment',   CND.escape_html text
+      tag = "<!-- #{text} -->"
+      if last_type is 'tag'  then R[ R.length - 1 ] += tag
+      else                        R.push tag
+      #.....................................................................................................
+      last_type = 'tag'
+    #.......................................................................................................
+    endTag: ( name ) =>
+      tag = @_render_close_tag name
+      #.....................................................................................................
+      if last_type is 'tag'  then R[ R.length - 1 ] += tag
+      else                        R.push tag
+      #.....................................................................................................
+      last_type = 'tag'
+    #.......................................................................................................
+    text:     ( text ) =>
+      R.push '' if last_type is null
+      text  = CND.escape_html text
+      text  = hyphenate text
+      if disperse
+        text_parts = fragmentize text, fragmentize_settings
+        if last_type is 'text' then Array::push.apply R[ R.length - 1 ], text_parts
+        else                        R.push text_parts
+      else
+        if last_type is 'text' then R[ R.length - 1 ] += text
+        else                        R.push text
+      #.....................................................................................................
+      last_type = 'text'
+    #.......................................................................................................
+    startTag: ( name, attributes ) =>
+      tag = @_render_open_tag name, attributes
+      #.....................................................................................................
+      if last_type is 'tag'  then R[ R.length - 1 ] += tag
+      else                        R.push tag
+      #.....................................................................................................
+      last_type = 'tag'
+  #.........................................................................................................
+  parser    = new ( require 'parse5' ).SimpleApiParser handlers
+  R         = []
   parser.parse html
   #.........................................................................................................
   return R
