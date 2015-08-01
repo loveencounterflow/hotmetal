@@ -74,13 +74,8 @@ TEACUP                    = require 'coffeenode-teacup'
 
 #-----------------------------------------------------------------------------------------------------------
 @_render_empty_tag = ( name, attributes ) ->
-  # debug '©VKm6q', attributes
-  ### TAINT inefficient ###
-  ### TAINT won't honor repeate names ###
-  a = {}
-  if attributes?
-    a[ attribute[ 'name' ] ] = attribute[ 'value' ] for attribute in attributes
-  return TEACUP.render => TEACUP.TAG name, a
+  return TEACUP.render => TEACUP.TAG name, attributes if attributes?
+  return TEACUP.render => TEACUP.TAG name
 
 
 #===========================================================================================================
@@ -142,11 +137,42 @@ TEACUP                    = require 'coffeenode-teacup'
 
 #-----------------------------------------------------------------------------------------------------------
 @TAG.add_class = ( tag, clasz ) =>
+  ### Add a CSS class. ###
   attributes = tag[ 1 ]
-  if attributes[ 'class' ]?
+  if ( old_class = attributes[ 'class' ] )?
+    return tag if ( old_class.indexOf clasz ) >= 0
     attributes[ 'class' ] += ' ' + clasz
   else
     attributes[ 'class' ] = clasz
+  return tag
+
+#-----------------------------------------------------------------------------------------------------------
+@TAG.remove_class = ( tag, clasz ) =>
+  ### Remove a CSS class. ###
+  attributes = tag[ 1 ]
+  return tag unless ( old_class = attributes[ 'class' ] )?
+  return tag if ( position = old_class.indexOf clasz ) < 0
+  if old_class.length is clasz.length
+    @TAG.remove tag, 'class'
+  else
+    attributes[ 'class' ] = ( old_class[ ... position ] + old_class[ position + clasz.length .. ] ).trim()
+  return tag
+
+#-----------------------------------------------------------------------------------------------------------
+@TAG.get = ( tag, name ) =>
+  ### Get an attribute value. ###
+  return tag[ 1 ][ name ]
+
+#-----------------------------------------------------------------------------------------------------------
+@TAG.set = ( tag, name, value = undefined ) =>
+  ### Set an attribute. ###
+  tag[ 1 ][ name ] = value
+  return tag
+
+#-----------------------------------------------------------------------------------------------------------
+@TAG.remove = ( tag, name ) =>
+  ### Remove an attribute. ###
+  delete tag[ 1 ][ name ]
   return tag
 
 #===========================================================================================================
