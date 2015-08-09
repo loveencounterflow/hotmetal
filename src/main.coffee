@@ -178,13 +178,19 @@ TEACUP                    = require 'coffeenode-teacup'
 #===========================================================================================================
 # SLICING
 #-----------------------------------------------------------------------------------------------------------
+_copy = ( x ) ->
+  # return CND.LODASH.cloneDeep x
+  return JSON.parse JSON.stringify x
+
+#-----------------------------------------------------------------------------------------------------------
 @slice = ( me, start = 0, stop = null ) ->
   stop             ?= me.length
   start             = Math.max 0, Math.min me.length, start
   stop              = Math.max 0, Math.min me.length, stop
   #.........................................................................................................
   return [] if start >= stop
-  R                 = CND.LODASH.cloneDeep me
+  R                 = _copy me
+  # R                 = CND.LODASH.cloneDeep me
   # R                 = @copy me
   return R if start is 0 and stop is me.length
   #.........................................................................................................
@@ -202,7 +208,8 @@ TEACUP                    = require 'coffeenode-teacup'
     for sub_idx in [ open_tags.length - 1 .. 0 ] by -1
       open_tag_count += 1
       continue unless open_tag_count > 0
-      first_open_tags.unshift CND.LODASH.cloneDeep open_tags[ sub_idx ]
+      first_open_tags.unshift _copy open_tags[ sub_idx ]
+      # first_open_tags.unshift CND.LODASH.cloneDeep open_tags[ sub_idx ]
   #.........................................................................................................
   ### Closing all remaining open tags: ###
   for [ open_tags, text, close_tags, ] in R
@@ -235,11 +242,11 @@ TEACUP                    = require 'coffeenode-teacup'
       else
         start = chunk_idx
     #.......................................................................................................
-    open_tag_count += open_tags.length
-    open_tag_count -= close_tags.length
+    open_tag_count += +open_tags.length
+    open_tag_count += -close_tags.length
     #.......................................................................................................
     if open_tag_count is 0
-      if last_open_tag_count isnt 0
+      if open_tags.length > 0 or last_open_tag_count isnt 0
         stop  = chunk_idx + 1
         slice = @slice me, start, stop
         if handler? then handler null, slice else R.push slice
@@ -624,24 +631,6 @@ TEACUP                    = require 'coffeenode-teacup'
 ###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
 ### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
 ###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-
-#===========================================================================================================
-# BALANCED COLUMNS
-#-----------------------------------------------------------------------------------------------------------
-@get_column_linecounts = ( strategy, line_count, column_count ) ->
-  ### thx to http://stackoverflow.com/a/1244369/256361 ###
-  R   = []
-  #.........................................................................................................
-  switch strategy
-    #.......................................................................................................
-    when 'even'
-      for col in [ 1 .. column_count ]
-        R.push ( line_count + column_count - col ) // column_count
-    #.......................................................................................................
-    else
-      throw new Error "unknown strategy #{rpr strategy}"
-  #.........................................................................................................
-  return R
 
 
 #===========================================================================================================
