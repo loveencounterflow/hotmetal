@@ -1,10 +1,14 @@
 
-#===========================================================================================================
-# HYPHENATION
-#-----------------------------------------------------------------------------------------------------------
-@$hyphenate = ( hyphenation = null, min_length = 4 ) ->
-  hyphenate = @HOTMETAL.new_hyphenate hyphenation, min_length
-  return $ ( text, send ) => send hyphenate text, min_length
+
+############################################################################################################
+CND                       = require 'cnd'
+rpr                       = CND.rpr.bind CND
+badge                     = 'HOTMETAL/HYPHENATOR'
+#...........................................................................................................
+HOTMETAL                  = require '..'
+#...........................................................................................................
+D                         = require 'pipedreams2'
+$                         = D.remit.bind D
 
 
 #===========================================================================================================
@@ -16,5 +20,13 @@
   hyphenation  ?= require 'hyphenation.en-us'
   HYPHER        = new Hypher hyphenation
   return HYPHER.hyphenateText.bind HYPHER
+
+
+#===========================================================================================================
+# STREAMING & PIPING
+#-----------------------------------------------------------------------------------------------------------
+@$hyphenate = ( hyphenation = null, min_length = 4 ) ->
+  hyphenate = @new_hyphenate hyphenation, min_length
+  return $ ( text, send ) => send hyphenate text, min_length
 
 

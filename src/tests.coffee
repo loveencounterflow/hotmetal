@@ -24,6 +24,16 @@ handle = ( handler ) ->
     throw error if error?
     handler result
 
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Dependency availability" ] = ( T, done ) ->
+  debug '©OKWgO', H.HTML
+  debug '©f65gK', H.HYPHENATOR
+  debug '©yEocf', H.LINEBREAKER
+  debug '©7YePi', H.MARKDOWN
+  debug '©2NQwg', H.TYPO
+  done()
+
 #-----------------------------------------------------------------------------------------------------------
 @[ "Object creation" ] = ( T, done ) ->
   T.eq H._new_hotml(), []
@@ -303,59 +313,6 @@ handle = ( handler ) ->
   hotml = H.HTML.parse html
   T.eq match, H.as_html hotml
   done()
-
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "Line breaking 1" ] = ( T, done ) ->
-#   lines = []
-#   #.........................................................................................................
-#   test_line = ( hotml ) ->
-#     return ( ( chunk[ 1 ] for chunk in hotml ).join '' ).length < 20
-#   #.........................................................................................................
-#   set_line = ( hotml ) ->
-#     lines.push hotml
-#   #.........................................................................................................
-#   html  = """Paragraph internationalization assignment (certainly) relativity."""
-#   match = [[[[],"Para­",[]],[[],"graph ",[]],[[],"in­",[]],[[],"ter­",[]]],[[[],"na­",[]],[[],"tion­",[]],[[],"al­",[]],[[],"iza­",[]]],[[[],"tion ",[]],[[],"as­",[]],[[],"sign­",[]],[[],"ment ",[]]],[[[],"(cer­",[]],[[],"tainly) ",[]],[[],"rel­",[]],[[],"a­",[]]],[[[],"tiv­",[]],[[],"ity.",[]]]]
-#   hotml = H.HTML.parse html
-#   H.break_lines hotml, test_line, set_line
-#   # urge JSON.stringify lines
-#   # urge H.rpr line for line in lines
-#   T.eq match, lines
-#   done()
-
-# # #-----------------------------------------------------------------------------------------------------------
-# # @[ "Line breaking 2" ] = ( T, done ) ->
-# #   count = 0
-# #   #.........................................................................................................
-# #   test_line = ( html ) ->
-# #     count += 1
-# #     return html.length < 30
-# #   #.........................................................................................................
-# #   set_line = ( html ) ->
-# #     # help html
-# #   #.........................................................................................................
-# #   html  = """https://www.google.de/search?q=a+very+long+URL&ie=utf-8&oe=utf-8&gws_rd=cr&ei=4TjpVP3AC8GcPPq1gfgE"""
-# #   match = ["https://​www.google.de/​","search?q=a+very+long","+URL&amp;ie=utf-8&amp;oe=utf-8&amp;gws_rd=cr&amp;ei=4TjpVP3AC8GcP-","Pq1gfgE"]
-# #   lines = H.break_lines html, test_line, set_line
-# #   T.eq match, lines
-# #   done()
-
-# # #-----------------------------------------------------------------------------------------------------------
-# # @[ "Line breaking 3" ] = ( T, done ) ->
-# #   #.........................................................................................................
-# #   test_line = ( html ) ->
-# #     # debug '©Dht0s', ( html.length < 10 ), rpr html
-# #     return html.length < 10
-# #   #.........................................................................................................
-# #   set_line = ( html ) ->
-# #     # help html
-# #   #.........................................................................................................
-# #   html  = """https://www.google.de/search?q=a+very+long+URL&ie=utf-8&oe=utf-8&gws_rd=cr&ei=4TjpVP3AC8GcPPq1gfgE"""
-# #   match = ["https://​","www.google.de/​","search?","q=a+very","+long","+URL&amp;ie=utf-8&amp;oe=utf-8&amp;gws_rd=cr&amp;ei=4TjpVP3AC8GcP-","Pq1gfgE"]
-# #   lines = H.break_lines html, test_line, set_line
-# #   # urge JSON.stringify lines
-# #   T.eq match, lines
-# #   done()
 
 ############################################################################################################
 settings = 'timeout': 500

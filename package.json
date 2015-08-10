@@ -26,12 +26,15 @@
     "cnd": "^0.1.5",
     "coffeenode-markdown-it": "^4.1.1",
     "coffeenode-teacup": "^0.1.4",
-    "guy-test": "^0.1.12",
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.3",
     "linebreak": "^0.3.0",
     "markdown-it": "^3.0.7",
     "parse5": "^1.4.0",
+    "pipedreams2": "^0.2.22",
     "typogr": "^0.6.5"
+  },
+  "devDependencies": {
+    "guy-test": "^1.0.4"
   }
 }

@@ -1,45 +1,23 @@
 
 
-#===========================================================================================================
-# HTML
-#-----------------------------------------------------------------------------------------------------------
-@HTML = {}
 
-#---------------------------------------------------------------------------------------------------------
-@HTML.$parse = ( settings ) ->
-  return $ ( html, send ) =>
-    send PIPEDREAMS.HOTMETAL.HTML.parse html, settings
+############################################################################################################
+CND                       = require 'cnd'
+rpr                       = CND.rpr.bind CND
+badge                     = 'HOTMETAL/HTML'
+#...........................................................................................................
+HOTMETAL                  = require '..'
+#...........................................................................................................
+D                         = require 'pipedreams2'
+$                         = D.remit.bind D
 
-#---------------------------------------------------------------------------------------------------------
-@HTML.$split = ( settings ) ->
-  return $ ( html, send ) =>
-    send PIPEDREAMS.HOTMETAL.HTML.split html, settings
 
 #-----------------------------------------------------------------------------------------------------------
-@HTML.$slice_toplevel_tags = ->
-  return $ ( me, send ) =>
-    PIPEDREAMS.HOTMETAL.slice_toplevel_tags me, ( error, slice ) =>
-      return send.error error if error?
-      send slice
-
-#-----------------------------------------------------------------------------------------------------------
-@HTML.$unwrap = ( silent = no) ->
-  return $ ( me, send ) =>
-    send PIPEDREAMS.HOTMETAL.unwrap me, silent
-
-
-
-#===========================================================================================================
-# HTML PARSING
-#-----------------------------------------------------------------------------------------------------------
-@HTML = {}
-
-#-----------------------------------------------------------------------------------------------------------
-@HTML._lone_tags = """area base br col command embed hr img input keygen link meta param
+@_lone_tags = """area base br col command embed hr img input keygen link meta param
     source track wbr""".split /\s+/
 
-#---------------------------------------------------------------------------------------------------------
-@HTML.parse = ( html, settings ) =>
+#-----------------------------------------------------------------------------------------------------------
+@parse = ( html, settings ) =>
   ### TAINT words in code blocks will be hyphenated, too ###
   disperse              = settings?[ 'disperse'     ] ? yes
   hyphenation           = settings?[ 'hyphenation'  ] ? yes
@@ -48,7 +26,7 @@
   fragmentize_settings  = { whitespace, chrs, }
   #.........................................................................................................
   if disperse
-    fragmentize = @fragmentize.bind @
+    fragmentize = HOTMETAL.LINEBREAKER.fragmentize.bind HOTMETAL.LINEBREAKER
   #.........................................................................................................
   else
     fragmentize = ( text ) -> [ text, ]
@@ -59,43 +37,46 @@
     hyphenate   = hyphenation
   else
     hyphenation = if hyphenation is true then null else hyphenation
-    hyphenate   = @new_hyphenate hyphenation
+    hyphenate   = HOTMETAL.HYPHENATOR.new_hyphenate hyphenation
   #.........................................................................................................
   handlers =
     #.......................................................................................................
-    doctype:  ( name, pid, sid ) => @add R, 'doctype',   name, pid, sid
-    endTag:   ( name )           => @add R, 'close-tag', name
-    comment:  ( text )           => @add R, 'comment',   CND.escape_html text
+    doctype:  ( name, pid, sid ) => HOTMETAL.add R, 'doctype',   name, pid, sid
+    endTag:   ( name )           => HOTMETAL.add R, 'close-tag', name
+    comment:  ( text )           => HOTMETAL.add R, 'comment',   CND.escape_html text
     #.......................................................................................................
     text:     ( text ) =>
       text  = CND.escape_html text
       text  = hyphenate text
       for text_part in fragmentize text, fragmentize_settings
-        @add R, 'text', text_part
+        HOTMETAL.add R, 'text', text_part
+      return null
     #.......................................................................................................
     startTag: ( name, a ) =>
       attributes = {}
       ( attributes[ k ] = v for { name: k, value: v, } in a ) if a?
       #.....................................................................................................
-      if name in @HTML._lone_tags
+      if name in @_lone_tags
         if name is 'wbr'
           throw new Error "illegal <wbr> tag with attributes" if ( Object.keys attributes ).length > 0
           ### as per https://developer.mozilla.org/en/docs/Web/HTML/Element/wbr ###
-          @add R, 'text', '\u200b'
+          HOTMETAL.add R, 'text', '\u200b'
         else
-          @add R, 'lone-tag', name, attributes
+          HOTMETAL.add R, 'lone-tag', name, attributes
       #.....................................................................................................
       else
-        @add R, 'open-tag', name, attributes
+        HOTMETAL.add R, 'open-tag', name, attributes
+      #.....................................................................................................
+      return null
   #.........................................................................................................
   parser    = new ( require 'parse5' ).SimpleApiParser handlers
-  R         = @_new_hotml()
+  R         = HOTMETAL._new_hotml()
   parser.parse html
   #.........................................................................................................
   return R
 
-#---------------------------------------------------------------------------------------------------------
-@HTML.split = ( html, settings ) =>
+#-----------------------------------------------------------------------------------------------------------
+@split = ( html, settings ) =>
   ### A faster parse routine that returns a list whose elements alternatively represent tags and
   texts.
 
@@ -111,7 +92,7 @@
   last_type             = null
   #.........................................................................................................
   if disperse
-    fragmentize = @fragmentize.bind @
+    fragmentize = HOTMETAL.LINEBREAKER.fragmentize.bind HOTMETAL.LINEBREAKER
   #.........................................................................................................
   else
     fragmentize = ( text ) -> [ text, ]
@@ -122,16 +103,16 @@
     hyphenate   = hyphenation
   else
     hyphenation = if hyphenation is true then null else hyphenation
-    hyphenate   = @new_hyphenate hyphenation
+    hyphenate   = HOTMETAL.HYPHENATOR.new_hyphenate hyphenation
   #.........................................................................................................
   handlers =
     #.......................................................................................................
-    doctype:  ( name, pid, sid ) => throw new Error "not implemented" # @add R, 'doctype',   name, pid, sid
+    doctype:  ( name, pid, sid ) => throw new Error "not implemented" # HOTMETAL.add R, 'doctype',   name, pid, sid
     #.......................................................................................................
     comment: ( text ) =>
       # debug '©S9IOL', R
       # debug '©RlDtj', rpr text
-      # throw new Error "not implemented" # @add R, 'comment',   CND.escape_html text
+      # throw new Error "not implemented" # HOTMETAL.add R, 'comment',   CND.escape_html text
       tag = "<!-- #{text} -->"
       if last_type is 'tag'  then R[ R.length - 1 ] += tag
       else                        R.push tag
@@ -145,6 +126,8 @@
       else                        R.push tag
       #.....................................................................................................
       last_type = 'tag'
+      #.....................................................................................................
+      return null
     #.......................................................................................................
     text:     ( text ) =>
       R.push '' if last_type is null
@@ -159,6 +142,8 @@
         else                        R.push text
       #.....................................................................................................
       last_type = 'text'
+      #.....................................................................................................
+      return null
     #.......................................................................................................
     startTag: ( name, attributes ) =>
       tag = @_render_open_tag name, attributes
@@ -167,6 +152,8 @@
       else                        R.push tag
       #.....................................................................................................
       last_type = 'tag'
+      #.....................................................................................................
+      return null
   #.........................................................................................................
   parser    = new ( require 'parse5' ).SimpleApiParser handlers
   R         = []
@@ -174,13 +161,30 @@
   #.........................................................................................................
   return R
 
-### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-### # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
-###  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ###
+
+#===========================================================================================================
+# STREAMING & PIPING
+#-----------------------------------------------------------------------------------------------------------
+@$parse = ( settings ) ->
+  return $ ( html, send ) =>
+    send @parse html, settings
+
+#-----------------------------------------------------------------------------------------------------------
+@$split = ( settings ) ->
+  return $ ( html, send ) =>
+    send @split html, settings
+
+#-----------------------------------------------------------------------------------------------------------
+@$slice_toplevel_tags = ->
+  return $ ( me, send ) =>
+    HOTMETAL.slice_toplevel_tags me, ( error, slice ) =>
+      return send.error error if error?
+      send slice
+
+#-----------------------------------------------------------------------------------------------------------
+@$unwrap = ( silent = no) ->
+  return $ ( me, send ) =>
+    send HOTMETAL.unwrap me, silent
+
+
+
