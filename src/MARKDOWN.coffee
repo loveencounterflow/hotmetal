@@ -15,7 +15,7 @@ $                         = D.remit.bind D
 #===========================================================================================================
 # MARKDOWN
 #-----------------------------------------------------------------------------------------------------------
-@new_parser = ( settings ) =>
+@new_parser = ( settings ) ->
   throw new Error "settings not yet supported" if settings?
   settings =
     html:         true
@@ -35,7 +35,7 @@ $                         = D.remit.bind D
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@as_html = ( md, parser = null ) =>
+@as_html = ( md, parser = null ) ->
   return ( parser ? @new_parser() ).render md
 
 

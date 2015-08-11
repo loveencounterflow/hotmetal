@@ -14,8 +14,8 @@ $                         = D.remit.bind D
 #===========================================================================================================
 # TYPOGRAPHIC ENHANCEMENTS
 #-----------------------------------------------------------------------------------------------------------
-@quotes = ( text ) => ( require 'typogr' ).smartypants text
-@dashes = ( text ) => ( require 'typogr' ).smartypants text
+@quotes = ( text ) -> ( require 'typogr' ).smartypants text
+@dashes = ( text ) -> ( require 'typogr' ).smartypants text
 
 
 #===========================================================================================================

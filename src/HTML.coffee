@@ -17,7 +17,7 @@ $                         = D.remit.bind D
     source track wbr""".split /\s+/
 
 #-----------------------------------------------------------------------------------------------------------
-@parse = ( html, settings ) =>
+@parse = ( html, settings ) ->
   ### TAINT words in code blocks will be hyphenated, too ###
   disperse              = settings?[ 'disperse'     ] ? yes
   hyphenation           = settings?[ 'hyphenation'  ] ? yes
@@ -76,7 +76,7 @@ $                         = D.remit.bind D
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@split = ( html, settings ) =>
+@split = ( html, settings ) ->
   ### A faster parse routine that returns a list whose elements alternatively represent tags and
   texts.
 
