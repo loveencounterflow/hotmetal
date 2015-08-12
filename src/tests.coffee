@@ -314,6 +314,25 @@ handle = ( handler ) ->
   T.eq match, H.as_html hotml
   done()
 
+#-----------------------------------------------------------------------------------------------------------
+@[ "parsing markdown" ] = ( T, done ) ->
+  md    = """A *pretty* **sophisticated** story, she said."""
+  match = '<p loc="0,1">A <em>pretty</em> <strong>sophisticated</strong> story, she said.</p>\n'
+  html  = H.MARKDOWN.as_html md
+  T.eq match, html
+  done()
+
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "hyphenate" ] = ( T, done ) ->
+#   html      = '<p loc="0,1">A <em>pretty</em> <strong>sophisticated</strong> story, she said.</p>\n'
+#   match     = '<p loc="0,1">A <em>pretty</em> <strong>sophisticated</strong> story, she said.</p>\n'
+#   hyphenate = H.HYPHENATOR.new_hyphenate 'hyphenation.en-us', 2
+#   debug '©Z4tv2', rpr hyphenate html
+#   debug '©Z4tv2', rpr hyphenate 'hyphenation'
+#   debug '©8ayz2', H.HTML.parse html
+#   # T.eq match, html
+#   done()
+
 ############################################################################################################
 settings = 'timeout': 500
 # settings = null
