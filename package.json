@@ -1,6 +1,6 @@
 {
   "name": "hotmetal",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Parse, hyphenate, slice, and render your HTML.",
   "main": "lib/main.js",
   "scripts": {
