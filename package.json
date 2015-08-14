@@ -31,7 +31,7 @@
     "linebreak": "^0.3.0",
     "markdown-it": "^3.0.7",
     "parse5": "^1.4.0",
-    "pipedreams2": "^0.2.22",
+    "pipedreams": "^0.2.25",
     "typogr": "^0.6.5"
   },
   "devDependencies": {
