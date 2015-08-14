@@ -35,6 +35,7 @@
     "typogr": "^0.6.5"
   },
   "devDependencies": {
+    "coffee-script": "^1.9.3",
     "guy-test": "^1.0.4"
   }
 }
